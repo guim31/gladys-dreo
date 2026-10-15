@@ -28,8 +28,24 @@ Gladys before reporting a problem.
 
 ## Scope
 
-In scope: the code of this repository and the Docker image it publishes.
+In scope: the code of this repository and the Docker image it publishes, in
+particular how it handles the Dreo account:
+
+- the e-mail address and the password live in the Gladys configuration (the
+  password is a `secret` field, never sent back to the browser); the password
+  only leaves the container as its MD5 hash, to the Dreo login endpoint, over
+  HTTPS;
+- `/data/dreo-session.json` (mode 600) holds the Dreo access token, the account
+  region and a SHA-256 hash of the e-mail address — never the address nor the
+  password;
+- the container only talks to Gladys and to the Dreo cloud
+  (`app-api-eu|us.dreo-tech.com` over HTTPS, `wsb-eu|us.dreo-tech.com` over
+  secure WebSocket); it opens no port;
+- the logs never contain the password, the token nor the e-mail address, at any
+  level (`test/live.test.js` checks it);
+- turning a space heater on from Gladys is refused unless the user enables it
+  in the configuration.
 
 Out of scope: Gladys Assistant itself (see its
 [security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+the Dreo cloud, the Dreo app and the Dreo devices.
