@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-15
+
 ### Added
 
 - Dreo tower fans, air circulators and ceiling fans: on/off, speed within the
@@ -29,3 +31,6 @@ the notes of the version's GitHub Release.
 - "Refresh the devices" button listing the devices of the account, supported
   or not.
 - Texts and documentation in English, French, German and Spanish.
+
+[Unreleased]: https://github.com/guim31/gladys-dreo/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/guim31/gladys-dreo/releases/tag/v1.0.1
