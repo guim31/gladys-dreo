@@ -31,16 +31,24 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
+index.js                          SDK wiring only: src/app.js registers the handlers before connect()
+src/app.js                        every SDK handler -> the hub; "Refresh the devices" report
+src/hub.js                        login, discovery, WebSocket events, refresh timer, commands, trigger
+src/devices.js                    Dreo device -> Gladys features, values, commands (heater safety)
+src/dreo/api.js                   REST client of the Dreo cloud (login, device list, state)
+src/dreo/socket.js                WebSocket link: keepalive "2", reconnection, silence watchdog
+src/dreo/models.js                kinds, speed bounds, modes per model (ported from pydreo)
+src/i18n.js                       feature names, mode labels, messages in en/fr/de/es
+src/issues.js                     deduplicated problem logs (one line when it starts, one when it ends)
+src/store.js                      /data/dreo-session.json (token, region, hash of the e-mail)
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
 src/widgets.js                    dashboard widget handlers (manifest `widgets`)
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
+scripts/probe.mjs                 read-only probe of the real Dreo cloud (fake account by default)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (same sections)
+test/                             node --test on the SDK's fake Gladys (helpers/world.js) and a
+                                  fake Dreo cloud (helpers/fakeDreo.js, fixtures/dreo/)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +78,10 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** comes in four languages (`en`, `fr`, `de` with "du",
+  `es` with "usted"): manifest texts, feature names, mode labels, messages,
+  widget texts, and `docs/en.md`, `fr.md`, `de.md`, `es.md` with the same
+  sections. `test/i18n.test.js` checks them.
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -233,3 +243,47 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## Intégration Dreo
+
+**API (celle de l'application Dreo, documentée par pydreo — JeffSteinbok/hass-dreo, MIT)**
+
+- REST sur `https://app-api-{eu|us}.dreo-tech.com` : `POST /api/oauth/login` (corps JSON avec les constantes
+  publiques de l'application `client_id`, `client_secret`, `himei`, `grant_type: "email-password"`, et le **MD5**
+  du mot de passe), `GET /api/v2/user-device/device/list`, `GET /api/user-device/device/state?deviceSn=`. Toujours
+  un paramètre `timestamp` (ms). Réponse `{ code: 0, data }` ; un `code` non nul au login est un refus du compte.
+- La réponse du login donne la **région réelle** du compte (`EU`/`NA`) : si elle diffère de l'hôte essayé, refaire
+  le login sur l'autre hôte (le jeton n'est valable que dans sa région).
+- WebSocket `wss://wsb-{eu|us}.dreo-tech.com/websocket?accessToken=…&timestamp=…`, keepalive texte `"2"` toutes les
+  15 s. Messages `{ devicesn, method, reported }` : `report`, `control-report`, `device-online` portent un état ;
+  `control-reply` n'est **que** l'accusé du cloud (ne jamais l'appliquer comme état) ; `device-offline` n'a pas de
+  `reported`. Commande : `{ devicesn, method: "control", params, timestamp }`, une à la fois ; un `reported.error_code`
+  dans la réponse est un refus (ex. 500003).
+- L'API ouverte officielle (`open-api-*.dreo-tech.com`, lib `hscloud` de dreo-team, utilisée par l'intégration du
+  cœur Home Assistant) n'a **pas** de WebSocket : non retenue, le brief demande le temps réel.
+- Aucun quota publié. Le cloud Dreo et `api.github.com` sont refusés par le proxy des sessions de code :
+  `scripts/probe.mjs` est le seul test réel possible, à lancer depuis une machine qui a le réseau.
+
+**Pièges découverts**
+
+- **Températures en °F** dans toutes les réponses connues (ambiante comme consigne `ecolevel` 41–95), quel que soit
+  `tempunit` : convertir en °C pour Gladys, consigne au degré (`step: 1`).
+- Le mode est `windtype` sur certains ventilateurs colonne, `mode` ailleurs ; un entier sur les ventilateurs et
+  humidificateurs, une chaîne sur les chauffages (`hotair`, `eco`, `coolair`, vide quand éteint) et les
+  purificateurs (`auto`, `manual`, `sleep`, `turbo`, avec des variantes `auto-regular`/`auto-silent` qu'il faut
+  **renvoyer telles quelles** : certains modèles refusent `auto`). Le combo DR-HSH016S code la fonction en entier
+  (`mode` 1 chauffe / 2 ventilation, `htamode` 1 puissance / 2 éco).
+- **Ventilateurs de plafond à « porte »** (`poweron` + `fanon`) : le ventilateur tourne si `poweron && fanon`.
+  Rouvrir la porte rallume toutes les charges mémorisées (lampe, ambiance) : pour réveiller le ventilateur seul,
+  envoyer `poweron: true, fanon: true` et `false` pour les autres charges ; la dernière charge éteinte doit
+  refermer la porte (`poweron: false`), l'appareil ne le fait pas seul.
+- Pas de `fan/binary` dans Gladys : la marche est un `switch/binary`. Les modes Dreo ne sont pas l'échelle
+  `FAN_MODE` du cœur (off/low/medium/high/auto) : `text/select` avec les modes du modèle. L'oscillation est
+  `fan/rock-setting`, dont le bitmap (1 gauche-droite, 2 haut-bas) est **exactement** celui de `oscmode`.
+- Un `switch/binary` est exposé à Alexa (`SMARTPLUG`) : l'allumage d'un chauffage est donc refusé **dans le
+  conteneur** tant que l'option `heater_remote_power_on` est désactivée (défaut), et mode/puissance aussi tant
+  qu'il est éteint. L'extinction et la consigne restent toujours possibles.
+- `lifetime` n'est un pourcentage de filtre que sur certains purificateurs (DR-HAP007S) : ailleurs ce sont des
+  heures. `wrong` est le réservoir des humidificateurs (0 plein, 1 ou 4 vide), un code d'erreur ailleurs.
+- Beaucoup de modèles récents ont un `controlsConf` vide : bornes de vitesse et modes viennent alors de la table de
+  `src/dreo/models.js` (reprise de pydreo `models.py`), sinon des valeurs par défaut du type.

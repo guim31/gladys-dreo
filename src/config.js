@@ -1,30 +1,24 @@
 // -----------------------------------------------------------------------------
-// Integration configuration.
-//
-// The configuration is filled in by the user in Gladys, from the `config_schema`
-// declared in `gladys-assistant-integration.json`. The SDK fetches it for you
-// (`gladys.getConfig()`) and notifies you of every change through
-// `gladys.onConfigUpdated()`.
-//
-// This module only provides defaults and normalizes the received object, so the
-// rest of the code never has to deal with `undefined`.
+// Integration configuration: defaults (they mirror the `default` values of the
+// manifest `config_schema`) and normalization, so the rest of the code never
+// deals with `undefined` or with values typed as strings by a form.
 // -----------------------------------------------------------------------------
 
-// Defaults: they MUST stay consistent with the `default` values declared in the
-// `config_schema` of the manifest.
+export const LANGUAGES = ['en', 'fr', 'de', 'es'];
+export const REGIONS = ['eu', 'us'];
+
 export const DEFAULT_CONFIG = {
-  latitude: 48.8566, // Paris
-  longitude: 2.3522,
-  unit: 'celsius', // 'celsius' | 'fahrenheit'
-  // Seconds between two reads of the polled sensors. Gladys polls at most once
-  // a minute: slower intervals are applied by skipping polls (see
-  // createPoller in src/devices/index.js).
-  poll_frequency: 300,
-  // Reserved key (NOT in config_schema): because the manifest declares both
-  // 'local' and 'cloud' in its `transports` field, Gladys shows a standard
-  // "Prefer the local connection" toggle and sends the user's choice here.
-  // Read-only for the integration; defaults to true.
-  GLADYS_PREFER_LOCAL: true,
+  email: '',
+  password: '',
+  // Where the Dreo account was created. The login answer names the real one:
+  // the integration follows it (see src/dreo/api.js), this is only the first try.
+  region: 'eu',
+  // Language of the feature names and of the texts the container produces
+  // (Gladys does not tell a device integration the user's language).
+  language: 'fr',
+  // Turning a space heater ON from Gladys is refused unless the user opts in:
+  // nobody may be in the room. Turning it off always works.
+  heater_remote_power_on: false,
 };
 
 /**
@@ -32,14 +26,19 @@ export const DEFAULT_CONFIG = {
  * @param {Record<string, unknown>} raw config returned by the SDK
  */
 export function normalizeConfig(raw = {}) {
+  const language = String(raw.language ?? DEFAULT_CONFIG.language).toLowerCase();
+  const region = String(raw.region ?? DEFAULT_CONFIG.region).toLowerCase();
   return {
-    ...DEFAULT_CONFIG,
-    ...raw,
-    // Force the types: config may arrive as strings from a form.
-    latitude: Number(raw.latitude ?? DEFAULT_CONFIG.latitude),
-    longitude: Number(raw.longitude ?? DEFAULT_CONFIG.longitude),
-    poll_frequency: Number(raw.poll_frequency ?? DEFAULT_CONFIG.poll_frequency),
-    // The preference is a boolean; anything but an explicit false means true.
-    GLADYS_PREFER_LOCAL: raw.GLADYS_PREFER_LOCAL !== false,
+    email: String(raw.email ?? '').trim(),
+    password: String(raw.password ?? ''),
+    region: REGIONS.includes(region) ? region : DEFAULT_CONFIG.region,
+    language: LANGUAGES.includes(language) ? language : DEFAULT_CONFIG.language,
+    heater_remote_power_on:
+      raw.heater_remote_power_on === true || raw.heater_remote_power_on === 'true',
   };
+}
+
+/** The integration can only reach the Dreo cloud once both are set. */
+export function isConfigured(config) {
+  return Boolean(config.email && config.password);
 }
