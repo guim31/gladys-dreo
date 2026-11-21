@@ -10,6 +10,13 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+### Added
+
+- Ceiling fan lights, on the fan device when the model reports them: the light
+  (on/off, brightness, colour temperature in kelvin) and the ambient light
+  (on/off, brightness, colour). Each one switches without waking the fan or the
+  other light. Already added fans get them with "Update" in the Discovery tab.
+
 ## [1.0.1] - 2026-10-15
 
 ### Added

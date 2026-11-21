@@ -10,14 +10,14 @@ velocidad cambiada con el mando o en la aplicación aparece en Gladys en un segu
 
 ## Presentación
 
-| Aparato Dreo                                                  | Lo que obtiene en Gladys                                                                                                                         |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Ventiladores de torre (DR-HTF…)                               | encendido, velocidad, modo, oscilación, temperatura de la habitación                                                                             |
-| Circuladores de aire / ventiladores de pie (DR-HAF…, DR-HPF…) | encendido, velocidad, modo, oscilación (horizontal y vertical), temperatura de la habitación                                                     |
-| Ventiladores de techo (DR-HCF…)                               | encendido del ventilador, velocidad, modo (incluido inverso)                                                                                     |
-| Calefactores (DR-HSH…, WH…)                                   | encendido (vea la parte de seguridad), temperatura objetivo, modo, nivel de calor, temperatura de la habitación, bloqueo infantil (solo lectura) |
-| Purificadores de aire (DR-HAP…)                               | encendido, velocidad, modo, PM2.5, vida útil del filtro (si se indica en %)                                                                      |
-| Humidificadores (DR-HHM…)                                     | encendido, modo, humedad objetivo, nivel de vapor, humedad, depósito o nivel de agua                                                             |
+| Aparato Dreo                                                  | Lo que obtiene en Gladys                                                                                                                            |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ventiladores de torre (DR-HTF…)                               | encendido, velocidad, modo, oscilación, temperatura de la habitación                                                                                |
+| Circuladores de aire / ventiladores de pie (DR-HAF…, DR-HPF…) | encendido, velocidad, modo, oscilación (horizontal y vertical), temperatura de la habitación                                                        |
+| Ventiladores de techo (DR-HCF…)                               | encendido del ventilador, velocidad, modo (incluido inverso); luz: encendido, brillo, temperatura de color; luz ambiental: encendido, brillo, color |
+| Calefactores (DR-HSH…, WH…)                                   | encendido (vea la parte de seguridad), temperatura objetivo, modo, nivel de calor, temperatura de la habitación, bloqueo infantil (solo lectura)    |
+| Purificadores de aire (DR-HAP…)                               | encendido, velocidad, modo, PM2.5, vida útil del filtro (si se indica en %)                                                                         |
+| Humidificadores (DR-HHM…)                                     | encendido, modo, humedad objetivo, nivel de vapor, humedad, depósito o nivel de agua                                                                |
 
 Los demás productos Dreo (aires acondicionados, deshumidificadores, ventiladores nebulizadores, cocinas) aparecen
 con el botón «Actualizar los aparatos» como «aún no compatible».
@@ -52,6 +52,11 @@ convierten a grados Celsius.
 La **oscilación** utiliza el ajuste de oscilación de ventiladores de Gladys: _apagada_ o _izquierda-derecha_ en los
 ventiladores de torre, además de _arriba-abajo_ y _ambas_ en los circuladores de aire inclinables. En los
 ventiladores de techo con luz, encender el ventilador nunca enciende la luz.
+
+**Luz de los ventiladores de techo**: la luz (encendido, brillo 1–100, temperatura de color 2700–6500 K) y la luz
+ambiental (encendido, brillo, color) aparecen en el aparato del ventilador cuando su modelo las indica. Cada una se
+enciende y se apaga sin despertar a las demás. ¿Ya añadió su ventilador? Abra la pestaña **Descubrimiento** y haga
+clic en «Actualizar» para obtener las nuevas funcionalidades: las existentes no cambian.
 
 ### Calefactores
 
@@ -127,8 +132,8 @@ inicio de sesión y luego una petición por aparato cada 10 minutos), y solo env
 - Desarrollada sin el hardware: los modelos son los de `hass-dreo`, los límites de un modelo ausente de sus tablas
   son estimaciones.
 - Solo nube: sin control local, nada funciona sin Internet.
-- Las luces de los ventiladores de techo, las luces ambientales, los temporizadores y los ajustes de pantalla y
-  sonido no están disponibles.
+- Los efectos de la luz ambiental (ciclos de colores, escenas RGBIC), los temporizadores y los ajustes de pantalla y
+  sonido no están disponibles. El color de la luz ambiental solo se ofrece en los modelos que lo indican.
 - Los aires acondicionados, deshumidificadores, ventiladores nebulizadores y cocinas aún no son compatibles.
 - Dreo indica las temperaturas en °F: la conversión redondea a 0,1 °C, y la temperatura objetivo al grado.
 - La API de la nube de Dreo no es pública: Dreo puede cambiarla sin previo aviso.

@@ -278,6 +278,13 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
   Rouvrir la porte rallume toutes les charges mémorisées (lampe, ambiance) : pour réveiller le ventilateur seul,
   envoyer `poweron: true, fanon: true` et `false` pour les autres charges ; la dernière charge éteinte doit
   refermer la porte (`poweron: false`), l'appareil ne le fait pas seul.
+- **Lumières des ventilateurs de plafond** (pydreo `pydreoceilingfan.py`, hass-dreo `light.py`) : `lighton`,
+  `brightness` 1–100, `colortemp` en **pourcentage** de 2700–6500 K (0 = chaud), publiée en kelvin ; ambiance
+  `atmon`, `atmbri` 1–5 (1–100 sur DR-HCF007S/008S/010S), `atmcolor` entier RGB 24 bits = `light/color` de Gladys.
+  Couleur proposée seulement si `atmcolor` est renvoyé (les autres passent par une API d'effets RGBIC, non pilotée).
+  Les réglages (luminosité, température, couleur) ne touchent jamais la porte. Certains HCF002S **n'envoient plus
+  `lighton`** tout en obéissant : les clés de porte/charges d'une commande acquittée sont appliquées à l'état
+  (`applySentLoads` du hub) ; le rafraîchissement REST reste la référence.
 - Pas de `fan/binary` dans Gladys : la marche est un `switch/binary`. Les modes Dreo ne sont pas l'échelle
   `FAN_MODE` du cœur (off/low/medium/high/auto) : `text/select` avec les modes du modèle. L'oscillation est
   `fan/rock-setting`, dont le bitmap (1 gauche-droite, 2 haut-bas) est **exactement** celui de `oscmode`.

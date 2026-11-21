@@ -10,14 +10,14 @@ télécommande ou dans l'application s'affiche dans Gladys en une seconde.
 
 ## Présentation
 
-| Appareil Dreo                                              | Ce que vous obtenez dans Gladys                                                                                             |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Ventilateurs colonne (DR-HTF…)                             | marche/arrêt, vitesse, mode, oscillation, température de la pièce                                                           |
-| Brasseurs d'air / ventilateurs sur pied (DR-HAF…, DR-HPF…) | marche/arrêt, vitesse, mode, oscillation (horizontale et verticale), température de la pièce                                |
-| Ventilateurs de plafond (DR-HCF…)                          | marche/arrêt du ventilateur, vitesse, mode (dont inversé)                                                                   |
-| Chauffages (DR-HSH…, WH…)                                  | marche/arrêt (voir la partie sécurité), consigne, mode, puissance, température de la pièce, sécurité enfant (lecture seule) |
-| Purificateurs d'air (DR-HAP…)                              | marche/arrêt, vitesse, mode, PM2.5, durée de vie du filtre (si exprimée en %)                                               |
-| Humidificateurs (DR-HHM…)                                  | marche/arrêt, mode, consigne d'humidité, brumisation, humidité, réservoir ou niveau d'eau                                   |
+| Appareil Dreo                                              | Ce que vous obtenez dans Gladys                                                                                                                                                   |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ventilateurs colonne (DR-HTF…)                             | marche/arrêt, vitesse, mode, oscillation, température de la pièce                                                                                                                 |
+| Brasseurs d'air / ventilateurs sur pied (DR-HAF…, DR-HPF…) | marche/arrêt, vitesse, mode, oscillation (horizontale et verticale), température de la pièce                                                                                      |
+| Ventilateurs de plafond (DR-HCF…)                          | marche/arrêt du ventilateur, vitesse, mode (dont inversé) ; lumière : marche/arrêt, luminosité, température de couleur ; éclairage d'ambiance : marche/arrêt, luminosité, couleur |
+| Chauffages (DR-HSH…, WH…)                                  | marche/arrêt (voir la partie sécurité), consigne, mode, puissance, température de la pièce, sécurité enfant (lecture seule)                                                       |
+| Purificateurs d'air (DR-HAP…)                              | marche/arrêt, vitesse, mode, PM2.5, durée de vie du filtre (si exprimée en %)                                                                                                     |
+| Humidificateurs (DR-HHM…)                                  | marche/arrêt, mode, consigne d'humidité, brumisation, humidité, réservoir ou niveau d'eau                                                                                         |
 
 Les autres produits Dreo (climatiseurs, déshumidificateurs, ventilateurs brumisateurs, cuiseurs) sont listés par
 le bouton « Actualiser les appareils » comme « pas encore pris en charge ».
@@ -52,6 +52,12 @@ températures sont converties en degrés Celsius.
 L'**oscillation** utilise le réglage d'oscillation des ventilateurs de Gladys : _arrêt_ ou _gauche-droite_ sur les
 ventilateurs colonne, plus _haut-bas_ et _les deux_ sur les brasseurs d'air inclinables. Sur les ventilateurs de
 plafond avec lampe, allumer le ventilateur n'allume jamais la lampe.
+
+**Lumière des ventilateurs de plafond** : la lumière (marche/arrêt, luminosité 1–100, température de couleur
+2700–6500 K) et l'éclairage d'ambiance (marche/arrêt, luminosité, couleur) apparaissent sur l'appareil du
+ventilateur quand votre modèle les renvoie. Chacun s'allume et s'éteint sans réveiller les autres. Ventilateur déjà
+ajouté ? Ouvrez l'onglet **Découverte** et cliquez sur « Mettre à jour » pour obtenir les nouvelles fonctionnalités :
+celles qui existent ne changent pas.
 
 ### Chauffages
 
@@ -127,8 +133,8 @@ connexion, puis une requête par appareil toutes les 10 minutes), et n'envoie à
 - Développée sans le matériel : les modèles sont ceux de `hass-dreo`, les bornes d'un modèle absent de ses tables
   sont estimées.
 - Cloud uniquement : pas de commande locale, rien ne fonctionne sans Internet.
-- Les lampes des ventilateurs de plafond, les éclairages d'ambiance, les minuteries, les réglages d'écran et de son
-  ne sont pas proposés.
+- Les effets de l'éclairage d'ambiance (cycles de couleurs, scènes RGBIC), les minuteries, les réglages d'écran et de
+  son ne sont pas proposés. La couleur de l'ambiance n'est proposée que sur les modèles qui la renvoient.
 - Les climatiseurs, déshumidificateurs, ventilateurs brumisateurs et cuiseurs ne sont pas encore pris en charge.
 - Dreo donne les températures en °F : la conversion arrondit au dixième de degré, et la consigne au degré.
 - L'API du cloud Dreo n'est pas publique : Dreo peut la changer sans prévenir.

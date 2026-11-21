@@ -54,6 +54,7 @@ export const TRIGGER_CONNECTION = 'connection_changed';
 
 const STATE_METHODS = new Set(['report', 'control-report', 'device-online']);
 const ACK_METHODS = new Set(['control-reply', 'control-report']);
+const GATE_KEYS = ['poweron', 'fanon', 'lighton', 'atmon'];
 
 export class DreoHub {
   /**
@@ -555,12 +556,33 @@ export class DreoHub {
       const params = buildCommand(dev, key, value, this.config);
       logger.info(`${dev.name}: ${key} → ${value}`);
       await this.send(dev, params);
+      this.applySentLoads(dev, params);
     } catch (err) {
       if (err instanceof UserError) {
         logger.info(`${dev?.name ?? device?.external_id}: command refused (${err.message})`);
         throw new Error(err.in(language), { cause: err });
       }
       throw err;
+    }
+  }
+
+  /**
+   * Folds the gate and load keys of an acknowledged command into a ceiling
+   * fan's state: some units stop reporting `lighton` while still obeying it
+   * (pydreo pydreoceilingfan.py), and the next command's gate logic reads
+   * these keys. The REST refresh stays the source of truth.
+   */
+  applySentLoads(dev, params) {
+    if (!dev.caps.power.gate) {
+      return;
+    }
+    const sent = Object.fromEntries(Object.entries(params).filter(([k]) => GATE_KEYS.includes(k)));
+    if (Object.keys(sent).length === 0) {
+      return;
+    }
+    this.applyState(dev, sent);
+    if (this.isCreated(dev)) {
+      this.publishValues(dev).catch(() => {});
     }
   }
 

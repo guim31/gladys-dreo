@@ -199,6 +199,10 @@ export class FakeDreoCloud {
         return;
       }
       socket.receive({ devicesn: sn, method: 'control-reply', reported: message.params });
+      if (this.commandBehavior === 'reply-only') {
+        // Some ceiling fans obey `lighton` without ever reporting it (pydreo).
+        return;
+      }
       this.set(sn, message.params);
       socket.receive({ devicesn: sn, method: 'control-report', reported: message.params });
     });

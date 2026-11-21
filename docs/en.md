@@ -10,14 +10,14 @@ in Gladys within a second.
 
 ## Overview
 
-| Dreo device                                     | What you get in Gladys                                                                                          |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Tower fans (DR-HTF…)                            | on/off, speed, mode, oscillation, room temperature                                                              |
-| Air circulators / floor fans (DR-HAF…, DR-HPF…) | on/off, speed, mode, oscillation (horizontal and vertical), room temperature                                    |
-| Ceiling fans (DR-HCF…)                          | fan on/off, speed, mode (including reverse)                                                                     |
-| Heaters (DR-HSH…, WH…)                          | on/off (see the safety section), target temperature, mode, heat level, room temperature, child lock (read-only) |
-| Air purifiers (DR-HAP…)                         | on/off, speed, mode, PM2.5, filter life (where reported in %)                                                   |
-| Humidifiers (DR-HHM…)                           | on/off, mode, target humidity, mist level, humidity, water tank or water level                                  |
+| Dreo device                                     | What you get in Gladys                                                                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Tower fans (DR-HTF…)                            | on/off, speed, mode, oscillation, room temperature                                                                                    |
+| Air circulators / floor fans (DR-HAF…, DR-HPF…) | on/off, speed, mode, oscillation (horizontal and vertical), room temperature                                                          |
+| Ceiling fans (DR-HCF…)                          | fan on/off, speed, mode (including reverse); light: on/off, brightness, colour temperature; ambient light: on/off, brightness, colour |
+| Heaters (DR-HSH…, WH…)                          | on/off (see the safety section), target temperature, mode, heat level, room temperature, child lock (read-only)                       |
+| Air purifiers (DR-HAP…)                         | on/off, speed, mode, PM2.5, filter life (where reported in %)                                                                         |
+| Humidifiers (DR-HHM…)                           | on/off, mode, target humidity, mist level, humidity, water tank or water level                                                        |
 
 Other Dreo products (air conditioners, dehumidifiers, misting fans, cookers) are listed by the "Refresh the
 devices" button as "not supported yet".
@@ -50,6 +50,11 @@ degrees Celsius.
 
 **Oscillation** uses the Gladys fan oscillation setting: _off_ or _left-right_ on tower fans, plus _up-down_ and
 _both_ on air circulators that tilt. On ceiling fans with a light, turning the fan on never turns the light on.
+
+**Ceiling fan lights**: the light (on/off, brightness 1–100, colour temperature 2700–6500 K) and the ambient light
+(on/off, brightness, colour) appear on the fan device when your model reports them. Each one switches on and off
+without waking the others. Already added your fan? Open the **Discovery** tab and click "Update" to get the new
+features: the existing ones do not change.
 
 ### Heaters
 
@@ -122,7 +127,8 @@ only sends Gladys the values that changed.
 - Developed without the hardware: the models are those of `hass-dreo`, the bounds of a model missing from its
   tables are guesses.
 - Cloud only: no local control, no control while the Internet is down.
-- The lights of ceiling fans, ambient lights, timers, display and sound settings are not exposed.
+- Ambient light effects (colour cycles, RGBIC scenes), timers, display and sound settings are not exposed. The
+  ambient light colour is offered only on the models that report it.
 - Air conditioners, dehumidifiers, misting fans and cookers are not supported yet.
 - Dreo reports temperatures in °F: the conversion rounds to 0.1 °C, and the target temperature to the degree.
 - The Dreo cloud API is not public: Dreo may change it without notice.

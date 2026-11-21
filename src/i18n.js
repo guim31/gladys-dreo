@@ -24,6 +24,13 @@ export const NAMES = {
     waterLevel: 'Water level',
     waterTank: 'Water tank',
     filterLife: 'Filter life',
+
+    light: 'Light',
+    lightBrightness: 'Light brightness',
+    lightTemperature: 'Light colour temperature',
+    ambientLight: 'Ambient light',
+    ambientBrightness: 'Ambient light brightness',
+    ambientColor: 'Ambient light colour',
   },
   fr: {
     power: 'Marche/arrêt',
@@ -41,6 +48,13 @@ export const NAMES = {
     waterLevel: "Niveau d'eau",
     waterTank: "Réservoir d'eau",
     filterLife: 'Durée de vie du filtre',
+
+    light: 'Lumière',
+    lightBrightness: 'Luminosité de la lumière',
+    lightTemperature: 'Température de couleur',
+    ambientLight: "Éclairage d'ambiance",
+    ambientBrightness: "Luminosité de l'ambiance",
+    ambientColor: "Couleur de l'ambiance",
   },
   de: {
     power: 'Ein/Aus',
@@ -58,6 +72,13 @@ export const NAMES = {
     waterLevel: 'Wasserstand',
     waterTank: 'Wassertank',
     filterLife: 'Filterlebensdauer',
+
+    light: 'Licht',
+    lightBrightness: 'Lichthelligkeit',
+    lightTemperature: 'Farbtemperatur',
+    ambientLight: 'Ambientelicht',
+    ambientBrightness: 'Helligkeit des Ambientelichts',
+    ambientColor: 'Farbe des Ambientelichts',
   },
   es: {
     power: 'Encendido',
@@ -75,6 +96,13 @@ export const NAMES = {
     waterLevel: 'Nivel de agua',
     waterTank: 'Depósito de agua',
     filterLife: 'Vida útil del filtro',
+
+    light: 'Luz',
+    lightBrightness: 'Brillo de la luz',
+    lightTemperature: 'Temperatura de color',
+    ambientLight: 'Luz ambiental',
+    ambientBrightness: 'Brillo de la luz ambiental',
+    ambientColor: 'Color de la luz ambiental',
   },
 };
 

@@ -90,7 +90,8 @@ const HEATER_MODES = [
 const KIND_DEFAULTS = {
   tower_fan: { speed: [1, 9], modes: FAN_MODES },
   air_circulator: { speed: [1, 9], modes: CIRCULATOR_MODES },
-  ceiling_fan: { speed: [1, 12], modes: CEILING_MODES },
+  // atmBrightness: the ambient light, 1-5 on the older models (pydreo).
+  ceiling_fan: { speed: [1, 12], modes: CEILING_MODES, atmBrightness: [1, 5] },
   purifier: { speed: [1, 4], modes: PURIFIER_MODES },
   humidifier: { modes: HUMIDIFIER_MODES },
   heater: { heatLevels: [1, 3], ecoF: [41, 95], modes: HEATER_MODES },
@@ -139,9 +140,9 @@ const MODEL_TABLE = {
   },
   'DR-HCF001S': { speed: [1, 12], modes: CEILING_MODES },
   'DR-HCF002S': { speed: [1, 12] },
-  'DR-HCF007S': { speed: [1, 12], modes: CEILING_MODES },
-  'DR-HCF008S': { speed: [1, 12], modes: CEILING_MODES },
-  'DR-HCF010S': { speed: [1, 12], modes: CEILING_MODES },
+  'DR-HCF007S': { speed: [1, 12], modes: CEILING_MODES, atmBrightness: [1, 100] },
+  'DR-HCF008S': { speed: [1, 12], modes: CEILING_MODES, atmBrightness: [1, 100] },
+  'DR-HCF010S': { speed: [1, 12], modes: CEILING_MODES, atmBrightness: [1, 100] },
   'DR-HCF521S': { speed: [1, 12] },
   'DR-HAP006S': { speed: [1, 4], modes: PURIFIER_MODES, autoCommand: 'auto-regular' },
   'DR-HAP007S': {
@@ -249,6 +250,7 @@ export function modelProfile(entry, state = {}) {
     ecoF: table.ecoF ?? defaults.ecoF ?? null,
     autoCommand: table.autoCommand ?? null,
     filterLifePercent: table.filterLifePercent === true,
+    atmBrightness: table.atmBrightness ?? defaults.atmBrightness ?? null,
   };
   if (model === 'DR-HTF007S' && /^CMS89F7518/.test(String(state.mcu_hardware_model ?? ''))) {
     profile.speed = [1, 4]; // older revision of the Nomad One S (pydreo)
