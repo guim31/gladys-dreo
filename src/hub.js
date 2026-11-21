@@ -54,6 +54,24 @@ export const TRIGGER_CONNECTION = 'connection_changed';
 
 const STATE_METHODS = new Set(['report', 'control-report', 'device-online']);
 const ACK_METHODS = new Set(['control-reply', 'control-report']);
+const GATE_KEYS = ['poweron', 'fanon', 'lighton', 'atmon'];
+// The Dreo REST state lags the device by several seconds (pydreo measured a
+// readback 4 s after a gate close still showing the gate open).
+const REST_LAG_MS = 30_000;
+
+/** A REST state, keeping the gate and load keys of a command sent just before. */
+function keepRecentLoads(dev, state, now) {
+  if (!dev.loadsSentAt || now - dev.loadsSentAt >= REST_LAG_MS) {
+    return state;
+  }
+  const kept = { ...state };
+  for (const key of GATE_KEYS) {
+    if (dev.state[key] !== undefined) {
+      kept[key] = dev.state[key];
+    }
+  }
+  return kept;
+}
 
 export class DreoHub {
   /**
@@ -393,7 +411,7 @@ export class DreoHub {
       try {
         const state = await this.api.getState(dev.sn);
         dev.refreshedAt = this.now();
-        this.applyState(dev, state, { replace: true });
+        this.applyState(dev, keepRecentLoads(dev, state, this.now()), { replace: true });
         this.issues.recover('refresh', 'Dreo states readable again');
       } catch (err) {
         if (err instanceof DreoAuthError) {
@@ -555,12 +573,34 @@ export class DreoHub {
       const params = buildCommand(dev, key, value, this.config);
       logger.info(`${dev.name}: ${key} → ${value}`);
       await this.send(dev, params);
+      this.applySentLoads(dev, params);
     } catch (err) {
       if (err instanceof UserError) {
         logger.info(`${dev?.name ?? device?.external_id}: command refused (${err.message})`);
         throw new Error(err.in(language), { cause: err });
       }
       throw err;
+    }
+  }
+
+  /**
+   * Folds the gate and load keys of an acknowledged command into a ceiling
+   * fan's state: some units stop reporting `lighton` while still obeying it
+   * (pydreo pydreoceilingfan.py), and the next command's gate logic reads
+   * these keys. The REST refresh stays the source of truth.
+   */
+  applySentLoads(dev, params) {
+    if (!dev.caps.power.gate) {
+      return;
+    }
+    const sent = Object.fromEntries(Object.entries(params).filter(([k]) => GATE_KEYS.includes(k)));
+    if (Object.keys(sent).length === 0) {
+      return;
+    }
+    this.applyState(dev, sent);
+    dev.loadsSentAt = this.now();
+    if (this.isCreated(dev)) {
+      this.publishValues(dev).catch(() => {});
     }
   }
 

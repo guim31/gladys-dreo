@@ -10,14 +10,14 @@ der Fernbedienung oder in der App änderst, erscheint innerhalb einer Sekunde in
 
 ## Überblick
 
-| Dreo-Gerät                                              | Was du in Gladys bekommst                                                                                 |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Turmventilatoren (DR-HTF…)                              | Ein/Aus, Stufe, Modus, Oszillation, Raumtemperatur                                                        |
-| Luftzirkulatoren / Standventilatoren (DR-HAF…, DR-HPF…) | Ein/Aus, Stufe, Modus, Oszillation (horizontal und vertikal), Raumtemperatur                              |
-| Deckenventilatoren (DR-HCF…)                            | Ventilator Ein/Aus, Stufe, Modus (auch umgekehrt)                                                         |
-| Heizgeräte (DR-HSH…, WH…)                               | Ein/Aus (siehe Sicherheit), Solltemperatur, Modus, Heizstufe, Raumtemperatur, Kindersicherung (nur lesen) |
-| Luftreiniger (DR-HAP…)                                  | Ein/Aus, Stufe, Modus, PM2.5, Filterlebensdauer (wenn in % gemeldet)                                      |
-| Luftbefeuchter (DR-HHM…)                                | Ein/Aus, Modus, Zielfeuchtigkeit, Nebelstufe, Luftfeuchtigkeit, Wassertank oder Wasserstand               |
+| Dreo-Gerät                                              | Was du in Gladys bekommst                                                                                                                |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Turmventilatoren (DR-HTF…)                              | Ein/Aus, Stufe, Modus, Oszillation, Raumtemperatur                                                                                       |
+| Luftzirkulatoren / Standventilatoren (DR-HAF…, DR-HPF…) | Ein/Aus, Stufe, Modus, Oszillation (horizontal und vertikal), Raumtemperatur                                                             |
+| Deckenventilatoren (DR-HCF…)                            | Ventilator Ein/Aus, Stufe, Modus (auch umgekehrt); Licht: Ein/Aus, Helligkeit, Farbtemperatur; Ambientelicht: Ein/Aus, Helligkeit, Farbe |
+| Heizgeräte (DR-HSH…, WH…)                               | Ein/Aus (siehe Sicherheit), Solltemperatur, Modus, Heizstufe, Raumtemperatur, Kindersicherung (nur lesen)                                |
+| Luftreiniger (DR-HAP…)                                  | Ein/Aus, Stufe, Modus, PM2.5, Filterlebensdauer (wenn in % gemeldet)                                                                     |
+| Luftbefeuchter (DR-HHM…)                                | Ein/Aus, Modus, Zielfeuchtigkeit, Nebelstufe, Luftfeuchtigkeit, Wassertank oder Wasserstand                                              |
 
 Andere Dreo-Produkte (Klimageräte, Luftentfeuchter, Sprühnebelventilatoren, Kochgeräte) listet die Schaltfläche
 „Geräte aktualisieren" als „noch nicht unterstützt" auf.
@@ -52,6 +52,11 @@ Grad Celsius umgerechnet.
 Die **Oszillation** nutzt die Ventilator-Oszillationseinstellung von Gladys: _aus_ oder _links-rechts_ bei
 Turmventilatoren, dazu _oben-unten_ und _beides_ bei neigbaren Luftzirkulatoren. Bei Deckenventilatoren mit
 Leuchte schaltet das Einschalten des Ventilators nie die Leuchte ein.
+
+**Licht von Deckenventilatoren**: Das Licht (Ein/Aus, Helligkeit 1–100, Farbtemperatur 2700–6500 K) und das
+Ambientelicht (Ein/Aus, Helligkeit, Farbe) erscheinen am Gerät des Ventilators, wenn dein Modell sie meldet. Jedes
+schaltet sich ein und aus, ohne die anderen zu wecken. Ventilator schon hinzugefügt? Öffne den Tab **Erkennung**
+und klicke auf „Aktualisieren“, um die neuen Funktionen zu erhalten: Die bestehenden ändern sich nicht.
 
 ### Heizgeräte
 
@@ -128,7 +133,8 @@ Anmeldung, dann eine Anfrage pro Gerät alle 10 Minuten), und schickt Gladys nur
 - Ohne die Hardware entwickelt: Die Modelle sind die von `hass-dreo`, die Grenzen eines Modells, das in seinen
   Tabellen fehlt, sind geschätzt.
 - Nur Cloud: keine lokale Steuerung, nichts funktioniert ohne Internet.
-- Leuchten von Deckenventilatoren, Ambientebeleuchtung, Timer, Anzeige- und Toneinstellungen werden nicht angeboten.
+- Effekte des Ambientelichts (Farbwechsel, RGBIC-Szenen), Timer, Anzeige- und Toneinstellungen werden nicht
+  angeboten. Die Farbe des Ambientelichts gibt es nur bei Modellen, die sie melden.
 - Klimageräte, Luftentfeuchter, Sprühnebelventilatoren und Kochgeräte werden noch nicht unterstützt.
 - Dreo meldet Temperaturen in °F: Die Umrechnung rundet auf 0,1 °C, die Solltemperatur auf ganze Grad.
 - Die API der Dreo-Cloud ist nicht öffentlich: Dreo kann sie ohne Vorwarnung ändern.

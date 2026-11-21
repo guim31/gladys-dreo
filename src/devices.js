@@ -31,6 +31,12 @@ const LIQUID_NORMAL = 1;
 const TARGET_HUMIDITY = [30, 90];
 const MIST_LEVELS = [1, 6];
 const FAN_KINDS = ['tower_fan', 'air_circulator', 'ceiling_fan'];
+// Ceiling fan main light (pydreo pydreoceilingfan.py, hass-dreo light.py):
+// brightness 1-100, colour temperature a 0-100 percentage of 2700-6500 K.
+const LIGHT_BRIGHTNESS = [1, 100];
+const KELVIN = [2700, 6500];
+// The loads behind the power gate of a ceiling fan.
+const LOADS = ['fanon', 'lighton', 'atmon'];
 
 const has = (state, key) => state[key] !== undefined && state[key] !== null;
 
@@ -63,6 +69,27 @@ export function capabilities(profile, state) {
     const modeKey = kind !== 'purifier' && has(state, 'windtype') ? 'windtype' : 'mode';
     if (profile.modes?.length && has(state, modeKey)) {
       caps.mode = { key: modeKey, modes: profile.modes };
+    }
+  }
+
+  if (kind === 'ceiling_fan') {
+    if (has(state, 'lighton')) {
+      caps.light = {
+        brightness: has(state, 'brightness'),
+        colorTemperature: has(state, 'colortemp'),
+      };
+    }
+    if (has(state, 'atmon')) {
+      // The RGBIC revision (HCF002S with `rgbeffectid`, no `atmcolor`)
+      // dims its ambient light from 1 to 100 (pydreo).
+      const rgbic = has(state, 'rgbeffectid') && !has(state, 'atmcolor');
+      caps.ambient = {
+        brightness: has(state, 'atmbri') ? (rgbic ? [1, 100] : profile.atmBrightness) : null,
+        // Only the direct RGB path: other units without `atmcolor` take
+        // colours through an effect API this integration does not drive.
+        color: has(state, 'atmcolor') || profile.directColor,
+        colorFeedback: has(state, 'atmcolor'),
+      };
     }
   }
 
@@ -209,6 +236,73 @@ export function buildDevice(gladys, dev, language) {
         max: caps.oscillation.max,
       }),
     );
+  }
+  if (caps.light) {
+    features.push(
+      feature(ids, 'light', n.light, {
+        category: C.LIGHT,
+        type: T.LIGHT.BINARY,
+        read_only: false,
+        max: 1,
+      }),
+    );
+    if (caps.light.brightness) {
+      features.push(
+        feature(ids, 'light-brightness', n.lightBrightness, {
+          category: C.LIGHT,
+          type: T.LIGHT.BRIGHTNESS,
+          read_only: false,
+          min: LIGHT_BRIGHTNESS[0],
+          max: LIGHT_BRIGHTNESS[1],
+        }),
+      );
+    }
+    if (caps.light.colorTemperature) {
+      features.push(
+        feature(ids, 'light-temperature', n.lightTemperature, {
+          category: C.LIGHT,
+          type: T.LIGHT.TEMPERATURE,
+          unit: 'kelvin',
+          read_only: false,
+          min: KELVIN[0],
+          max: KELVIN[1],
+        }),
+      );
+    }
+  }
+  if (caps.ambient) {
+    features.push(
+      feature(ids, 'ambient-light', n.ambientLight, {
+        category: C.LIGHT,
+        type: T.LIGHT.BINARY,
+        read_only: false,
+        max: 1,
+      }),
+    );
+    if (caps.ambient.brightness) {
+      features.push(
+        feature(ids, 'ambient-brightness', n.ambientBrightness, {
+          category: C.LIGHT,
+          type: T.LIGHT.BRIGHTNESS,
+          read_only: false,
+          min: caps.ambient.brightness[0],
+          max: caps.ambient.brightness[1],
+        }),
+      );
+    }
+    if (caps.ambient.color) {
+      features.push(
+        feature(ids, 'ambient-color', n.ambientColor, {
+          category: C.LIGHT,
+          type: T.LIGHT.COLOR,
+          read_only: false,
+          // DR-HCF007S/010S take a colour without ever reporting it.
+          has_feedback: caps.ambient.colorFeedback,
+          keep_history: false,
+          max: 0xffffff,
+        }),
+      );
+    }
   }
   if (caps.heatLevel) {
     const [low, high] = caps.heatLevel.range;
@@ -357,17 +451,28 @@ function modeName(modes, value) {
   return modes.find(([, v]) => v === base)?.[0] ?? null;
 }
 
+/** Whether a load behind the power gate is lit or running, or null when unknown. */
+function loadOn({ state, caps }, load) {
+  if (!has(state, load)) {
+    return null;
+  }
+  // Without a gate (DR-HCF001S), the load key alone tells.
+  return (!caps.power.gate || state.poweron !== false) && state[load] === true;
+}
+
 /** Whether the device runs (the "power" feature), or null when unknown. */
 export function isOn(dev) {
   const { state, caps } = dev;
   if (caps.power.gate) {
-    if (!has(state, 'fanon')) {
-      return null;
-    }
-    return state.poweron !== false && state.fanon === true;
+    return loadOn(dev, 'fanon');
   }
   return has(state, caps.power.key) ? state[caps.power.key] === true : null;
 }
+
+/** Dreo colour temperature (0-100 %, warm to cold) ↔ Gladys kelvin. */
+export const percentToKelvin = (p) => Math.round(KELVIN[0] + ((KELVIN[1] - KELVIN[0]) * p) / 100);
+export const kelvinToPercent = (k) =>
+  Math.min(100, Math.max(0, Math.round(((k - KELVIN[0]) * 100) / (KELVIN[1] - KELVIN[0]))));
 
 /** The current mode name (heaters: hotair, eco, coolair). */
 export function currentMode(dev) {
@@ -429,6 +534,26 @@ export function featureValues(dev) {
   if (caps.oscillation) {
     put('oscillation', oscillationValue(dev));
   }
+  if (caps.light) {
+    const lit = loadOn(dev, 'lighton');
+    put('light', lit === null ? null : lit ? 1 : 0);
+    if (caps.light.brightness) {
+      put('light-brightness', number(state.brightness));
+    }
+    if (caps.light.colorTemperature && number(state.colortemp) !== null) {
+      put('light-temperature', percentToKelvin(state.colortemp));
+    }
+  }
+  if (caps.ambient) {
+    const lit = loadOn(dev, 'atmon');
+    put('ambient-light', lit === null ? null : lit ? 1 : 0);
+    if (caps.ambient.brightness) {
+      put('ambient-brightness', number(state.atmbri));
+    }
+    if (caps.ambient.color) {
+      put('ambient-color', number(state.atmcolor));
+    }
+  }
   if (caps.heatLevel && number(state.htalevel) !== null) {
     values['heat-level'] = { text: String(state.htalevel) };
   }
@@ -486,29 +611,37 @@ function purifierAutoCommand(dev) {
   return typeof reported === 'string' && reported.startsWith('auto-') ? reported : 'auto';
 }
 
-function powerCommand(dev, on) {
+/**
+ * Switches one load of a ceiling fan behind its power gate (pydreo
+ * pydreoceilingfan.py): opening the gate re-energises every retained load, so
+ * waking one load forces the others off; the device never closes the gate by
+ * itself, so the last load off must.
+ */
+function loadCommand(dev, load, on) {
   const { state, caps } = dev;
   if (!caps.power.gate) {
-    return { [caps.power.key]: on };
+    return { [load]: on };
   }
+  const others = LOADS.filter((other) => other !== load && has(state, other));
   if (on) {
     if (state.poweron === false) {
-      // Opening the gate re-energises every retained load: wake the fan alone.
-      const params = { poweron: true, fanon: true };
-      for (const load of ['lighton', 'atmon']) {
-        if (has(state, load)) {
-          params[load] = false;
-        }
+      const params = { poweron: true, [load]: true };
+      for (const other of others) {
+        params[other] = false;
       }
       return params;
     }
-    return { fanon: true };
+    return { [load]: true };
   }
-  // The device never closes the gate by itself: the last load off must.
-  const otherLoadOn = ['lighton', 'atmon'].some((load) => state[load] === true);
+  const otherLoadOn = others.some((other) => state[other] === true);
   return state.poweron === true && !otherLoadOn
-    ? { fanon: false, poweron: false }
-    : { fanon: false };
+    ? { [load]: false, poweron: false }
+    : { [load]: false };
+}
+
+function powerCommand(dev, on) {
+  const { caps } = dev;
+  return loadCommand(dev, caps.power.gate ? 'fanon' : caps.power.key, on);
 }
 
 /**
@@ -574,6 +707,30 @@ export function buildCommand(dev, key, value, config) {
       }
       return params;
     }
+    case 'light':
+      if (!caps.light) break;
+      return loadCommand(dev, 'lighton', Number(value) === 1);
+    case 'light-brightness':
+      // Parameters only: never wakes the light (pydreo does the same).
+      if (!caps.light?.brightness) break;
+      return { brightness: integerIn(value, LIGHT_BRIGHTNESS) };
+    case 'light-temperature': {
+      if (!caps.light?.colorTemperature) break;
+      const kelvin = Number(value);
+      if (!Number.isFinite(kelvin)) {
+        throw new UserError('invalidValue', String(value));
+      }
+      return { colortemp: kelvinToPercent(kelvin) };
+    }
+    case 'ambient-light':
+      if (!caps.ambient) break;
+      return loadCommand(dev, 'atmon', Number(value) === 1);
+    case 'ambient-brightness':
+      if (!caps.ambient?.brightness) break;
+      return { atmbri: integerIn(value, caps.ambient.brightness) };
+    case 'ambient-color':
+      if (!caps.ambient?.color) break;
+      return { atmcolor: integerIn(value, [0, 0xffffff]) };
     case 'heat-level':
       if (!caps.heatLevel) break;
       if (heaterOff && !config.heater_remote_power_on) {

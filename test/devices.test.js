@@ -128,6 +128,86 @@ test('ceiling fan with a power gate: on means poweron AND fanon', () => {
   assert.deepEqual(buildCommand(lit, 'power', 0, DEFAULT), { fanon: false });
 });
 
+test('ceiling fan light: features only for the keys the device reports', () => {
+  const gated = dev('HCF002S_POWERON_OFF_1');
+  assert.deepEqual(gated.caps.light, { brightness: true, colorTemperature: true });
+  assert.deepEqual(gated.caps.ambient, { brightness: [1, 5], color: true, colorFeedback: true });
+  const values = featureValues(dev('HCF002S_POWERON_OFF_1', { poweron: true, lighton: true }));
+  assert.deepEqual(values.light, { state: 1 });
+  assert.deepEqual(values['light-brightness'], { state: 24 });
+  // 60 % of 2700-6500 K.
+  assert.deepEqual(values['light-temperature'], { state: 4980 });
+  assert.deepEqual(values['ambient-light'], { state: 0 });
+  assert.deepEqual(values['ambient-brightness'], { state: 3 });
+  assert.deepEqual(values['ambient-color'], { state: 65280 });
+  // Gate closed: the retained light is off.
+  assert.deepEqual(featureValues(dev('HCF002S_POWERON_OFF_1', { lighton: true })).light, {
+    state: 0,
+  });
+  // DR-HCF001S: a light, no ambient light, no gate.
+  const plain = dev('HCF001S_1');
+  assert.deepEqual(plain.caps.light, { brightness: true, colorTemperature: true });
+  assert.equal(plain.caps.ambient, undefined);
+  assert.deepEqual(featureValues(plain).light, { state: 0 });
+  assert.deepEqual(buildCommand(plain, 'light', 1, DEFAULT), { lighton: true });
+  // Other fans have no light.
+  assert.equal(dev('HTF017S_1').caps.light, undefined);
+  assert.throws(() => buildCommand(dev('HTF017S_1'), 'light', 1, DEFAULT));
+  // A ceiling fan that does not report lighton has no light feature.
+  const bare = dev('HCF002S_POWERON_OFF_1', { lighton: undefined, atmon: undefined });
+  assert.equal(bare.caps.light, undefined);
+  assert.equal(bare.caps.ambient, undefined);
+});
+
+test('ceiling fan light commands respect the power gate', () => {
+  // Gate closed: waking the light alone keeps the fan and the ambient light off.
+  const closed = dev('HCF002S_POWERON_OFF_1');
+  assert.deepEqual(buildCommand(closed, 'light', 1, DEFAULT), {
+    poweron: true,
+    lighton: true,
+    fanon: false,
+    atmon: false,
+  });
+  assert.deepEqual(buildCommand(closed, 'ambient-light', 1, DEFAULT), {
+    poweron: true,
+    atmon: true,
+    fanon: false,
+    lighton: false,
+  });
+  // Gate open, light the last load on: off closes the gate.
+  const lit = dev('HCF002S_POWERON_OFF_1', { poweron: true, fanon: false, lighton: true });
+  assert.deepEqual(buildCommand(lit, 'light', 1, DEFAULT), { lighton: true });
+  assert.deepEqual(buildCommand(lit, 'light', 0, DEFAULT), { lighton: false, poweron: false });
+  // The fan still runs: the gate stays open.
+  const both = dev('HCF002S_POWERON_OFF_1', { poweron: true, fanon: true, lighton: true });
+  assert.deepEqual(buildCommand(both, 'light', 0, DEFAULT), { lighton: false });
+  // Settings never touch the gate.
+  assert.deepEqual(buildCommand(closed, 'light-brightness', 80, DEFAULT), { brightness: 80 });
+  assert.throws(() => buildCommand(closed, 'light-brightness', 0, DEFAULT));
+  assert.deepEqual(buildCommand(closed, 'light-temperature', 2700, DEFAULT), { colortemp: 0 });
+  assert.deepEqual(buildCommand(closed, 'light-temperature', 6500, DEFAULT), { colortemp: 100 });
+  assert.deepEqual(buildCommand(closed, 'light-temperature', 9000, DEFAULT), { colortemp: 100 });
+  assert.deepEqual(buildCommand(closed, 'ambient-brightness', 5, DEFAULT), { atmbri: 5 });
+  assert.throws(() => buildCommand(closed, 'ambient-brightness', 6, DEFAULT));
+  assert.deepEqual(buildCommand(closed, 'ambient-color', 0xff0000, DEFAULT), {
+    atmcolor: 0xff0000,
+  });
+});
+
+test('ambient brightness 1-100 on the newer ceiling fans (pydreo)', () => {
+  const entry = { model: 'DR-HCF008S' };
+  const state = { poweron: true, fanon: true, atmon: true, atmbri: 70 };
+  const caps = capabilities(modelProfile(entry, state), state);
+  assert.deepEqual(caps.ambient, { brightness: [1, 100], color: false, colorFeedback: false });
+  // DR-HCF007S: a colour the device takes without reporting it.
+  const caps7 = capabilities(modelProfile({ model: 'DR-HCF007S' }, state), state);
+  assert.deepEqual(caps7.ambient, { brightness: [1, 100], color: true, colorFeedback: false });
+  // The RGBIC revision of the DR-HCF002S: 1-100, no direct colour.
+  const rgbic = { ...state, atmbri: 50, rgbeffectid: '2070476690030592000' };
+  const caps2 = capabilities(modelProfile({ model: 'DR-HCF002S' }, rgbic), rgbic);
+  assert.deepEqual(caps2.ambient, { brightness: [1, 100], color: false, colorFeedback: false });
+});
+
 test('ceiling fan without a gate: fanon alone', () => {
   const fan = dev('HCF001S_1');
   assert.equal(fan.caps.power.key, 'fanon');
