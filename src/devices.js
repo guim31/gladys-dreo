@@ -80,11 +80,15 @@ export function capabilities(profile, state) {
       };
     }
     if (has(state, 'atmon')) {
+      // The RGBIC revision (HCF002S with `rgbeffectid`, no `atmcolor`)
+      // dims its ambient light from 1 to 100 (pydreo).
+      const rgbic = has(state, 'rgbeffectid') && !has(state, 'atmcolor');
       caps.ambient = {
-        brightness: has(state, 'atmbri') ? profile.atmBrightness : null,
-        // Only the direct RGB path: units without `atmcolor` take colours
-        // through an effect API this integration does not drive.
-        color: has(state, 'atmcolor'),
+        brightness: has(state, 'atmbri') ? (rgbic ? [1, 100] : profile.atmBrightness) : null,
+        // Only the direct RGB path: other units without `atmcolor` take
+        // colours through an effect API this integration does not drive.
+        color: has(state, 'atmcolor') || profile.directColor,
+        colorFeedback: has(state, 'atmcolor'),
       };
     }
   }
@@ -292,6 +296,8 @@ export function buildDevice(gladys, dev, language) {
           category: C.LIGHT,
           type: T.LIGHT.COLOR,
           read_only: false,
+          // DR-HCF007S/010S take a colour without ever reporting it.
+          has_feedback: caps.ambient.colorFeedback,
           keep_history: false,
           max: 0xffffff,
         }),

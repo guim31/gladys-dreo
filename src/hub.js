@@ -55,6 +55,23 @@ export const TRIGGER_CONNECTION = 'connection_changed';
 const STATE_METHODS = new Set(['report', 'control-report', 'device-online']);
 const ACK_METHODS = new Set(['control-reply', 'control-report']);
 const GATE_KEYS = ['poweron', 'fanon', 'lighton', 'atmon'];
+// The Dreo REST state lags the device by several seconds (pydreo measured a
+// readback 4 s after a gate close still showing the gate open).
+const REST_LAG_MS = 30_000;
+
+/** A REST state, keeping the gate and load keys of a command sent just before. */
+function keepRecentLoads(dev, state, now) {
+  if (!dev.loadsSentAt || now - dev.loadsSentAt >= REST_LAG_MS) {
+    return state;
+  }
+  const kept = { ...state };
+  for (const key of GATE_KEYS) {
+    if (dev.state[key] !== undefined) {
+      kept[key] = dev.state[key];
+    }
+  }
+  return kept;
+}
 
 export class DreoHub {
   /**
@@ -394,7 +411,7 @@ export class DreoHub {
       try {
         const state = await this.api.getState(dev.sn);
         dev.refreshedAt = this.now();
-        this.applyState(dev, state, { replace: true });
+        this.applyState(dev, keepRecentLoads(dev, state, this.now()), { replace: true });
         this.issues.recover('refresh', 'Dreo states readable again');
       } catch (err) {
         if (err instanceof DreoAuthError) {
@@ -581,6 +598,7 @@ export class DreoHub {
       return;
     }
     this.applyState(dev, sent);
+    dev.loadsSentAt = this.now();
     if (this.isCreated(dev)) {
       this.publishValues(dev).catch(() => {});
     }

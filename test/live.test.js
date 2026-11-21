@@ -428,3 +428,22 @@ test('scene action: turn off the heaters only', async (t) => {
   assert.equal(ack.data.count ?? ack.data.outputs?.count, sent.length);
   assert.ok(sent.length >= 2);
 });
+
+test('a refresh right after a light command keeps the gate keys it sent (REST lag)', async (t) => {
+  captureLogs(t, 'silent');
+  t.mock.timers.enable(TIMERS);
+  const { hub, gladys, cloud } = await world(t);
+  const fan = deviceOf(gladys, 'HCF002S_POWERON_OFF_1');
+  const light = featureOf(fan, 'light');
+  cloud.commandBehavior = 'reply-only';
+  const pending = gladys.fake.setValue(fan, light, 1);
+  await settle();
+  assert.deepEqual(await pending, { success: true });
+  await hub.refresh();
+  await settle();
+  assert.equal(gladys.fake.lastState(light.external_id), 1, 'stale REST state ignored');
+  t.mock.timers.tick(31_000);
+  await hub.refresh();
+  await settle();
+  assert.equal(gladys.fake.lastState(light.external_id), 0, 'REST wins afterwards');
+});

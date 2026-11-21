@@ -131,7 +131,7 @@ test('ceiling fan with a power gate: on means poweron AND fanon', () => {
 test('ceiling fan light: features only for the keys the device reports', () => {
   const gated = dev('HCF002S_POWERON_OFF_1');
   assert.deepEqual(gated.caps.light, { brightness: true, colorTemperature: true });
-  assert.deepEqual(gated.caps.ambient, { brightness: [1, 5], color: true });
+  assert.deepEqual(gated.caps.ambient, { brightness: [1, 5], color: true, colorFeedback: true });
   const values = featureValues(dev('HCF002S_POWERON_OFF_1', { poweron: true, lighton: true }));
   assert.deepEqual(values.light, { state: 1 });
   assert.deepEqual(values['light-brightness'], { state: 24 });
@@ -198,7 +198,14 @@ test('ambient brightness 1-100 on the newer ceiling fans (pydreo)', () => {
   const entry = { model: 'DR-HCF008S' };
   const state = { poweron: true, fanon: true, atmon: true, atmbri: 70 };
   const caps = capabilities(modelProfile(entry, state), state);
-  assert.deepEqual(caps.ambient, { brightness: [1, 100], color: false });
+  assert.deepEqual(caps.ambient, { brightness: [1, 100], color: false, colorFeedback: false });
+  // DR-HCF007S: a colour the device takes without reporting it.
+  const caps7 = capabilities(modelProfile({ model: 'DR-HCF007S' }, state), state);
+  assert.deepEqual(caps7.ambient, { brightness: [1, 100], color: true, colorFeedback: false });
+  // The RGBIC revision of the DR-HCF002S: 1-100, no direct colour.
+  const rgbic = { ...state, atmbri: 50, rgbeffectid: '2070476690030592000' };
+  const caps2 = capabilities(modelProfile({ model: 'DR-HCF002S' }, rgbic), rgbic);
+  assert.deepEqual(caps2.ambient, { brightness: [1, 100], color: false, colorFeedback: false });
 });
 
 test('ceiling fan without a gate: fanon alone', () => {

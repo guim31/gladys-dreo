@@ -140,9 +140,20 @@ const MODEL_TABLE = {
   },
   'DR-HCF001S': { speed: [1, 12], modes: CEILING_MODES },
   'DR-HCF002S': { speed: [1, 12] },
-  'DR-HCF007S': { speed: [1, 12], modes: CEILING_MODES, atmBrightness: [1, 100] },
+  // directColor: no `atmcolor` in the state, but the device takes it (pydreo).
+  'DR-HCF007S': {
+    speed: [1, 12],
+    modes: CEILING_MODES,
+    atmBrightness: [1, 100],
+    directColor: true,
+  },
   'DR-HCF008S': { speed: [1, 12], modes: CEILING_MODES, atmBrightness: [1, 100] },
-  'DR-HCF010S': { speed: [1, 12], modes: CEILING_MODES, atmBrightness: [1, 100] },
+  'DR-HCF010S': {
+    speed: [1, 12],
+    modes: CEILING_MODES,
+    atmBrightness: [1, 100],
+    directColor: true,
+  },
   'DR-HCF521S': { speed: [1, 12] },
   'DR-HAP006S': { speed: [1, 4], modes: PURIFIER_MODES, autoCommand: 'auto-regular' },
   'DR-HAP007S': {
@@ -251,6 +262,7 @@ export function modelProfile(entry, state = {}) {
     autoCommand: table.autoCommand ?? null,
     filterLifePercent: table.filterLifePercent === true,
     atmBrightness: table.atmBrightness ?? defaults.atmBrightness ?? null,
+    directColor: table.directColor === true,
   };
   if (model === 'DR-HTF007S' && /^CMS89F7518/.test(String(state.mcu_hardware_model ?? ''))) {
     profile.speed = [1, 4]; // older revision of the Nomad One S (pydreo)
