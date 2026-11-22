@@ -153,6 +153,31 @@ test('a command goes over the WebSocket and its report updates Gladys', async (t
   assert.equal(logs.at('info').length, 1, 'one info line per user action');
 });
 
+test('ceiling fan light: a light the device obeys without reporting it still shows', async (t) => {
+  captureLogs(t, 'silent');
+  const { gladys, cloud } = await world(t);
+  const fan = deviceOf(gladys, 'HCF002S_POWERON_OFF_1');
+  const light = featureOf(fan, 'light');
+  assert.equal(featureOf(fan, 'light-temperature').unit, 'kelvin');
+  assert.equal(gladys.fake.lastState(light.external_id), 0);
+  cloud.commandBehavior = 'reply-only';
+  assert.deepEqual(await gladys.fake.setValue(fan, light, 1), { success: true });
+  assert.deepEqual(cloud.commands.at(-1).params, {
+    poweron: true,
+    lighton: true,
+    fanon: false,
+    atmon: false,
+  });
+  await settle();
+  assert.equal(gladys.fake.lastState(light.external_id), 1);
+  assert.equal(gladys.fake.lastState(featureOf(fan, 'power').external_id), 0);
+  // The light is the last load on: turning it off closes the gate.
+  assert.deepEqual(await gladys.fake.setValue(fan, light, 0), { success: true });
+  assert.deepEqual(cloud.commands.at(-1).params, { lighton: false, poweron: false });
+  await settle();
+  assert.equal(gladys.fake.lastState(light.external_id), 0);
+});
+
 test('a command the device refuses fails, in the configured language', async (t) => {
   captureLogs(t, 'silent');
   const { gladys, cloud } = await world(t, { config: { language: 'fr' } });
@@ -402,4 +427,23 @@ test('scene action: turn off the heaters only', async (t) => {
   assert.ok(sent.every((c) => c.devicesn.startsWith('HSH')));
   assert.equal(ack.data.count ?? ack.data.outputs?.count, sent.length);
   assert.ok(sent.length >= 2);
+});
+
+test('a refresh right after a light command keeps the gate keys it sent (REST lag)', async (t) => {
+  captureLogs(t, 'silent');
+  t.mock.timers.enable(TIMERS);
+  const { hub, gladys, cloud } = await world(t);
+  const fan = deviceOf(gladys, 'HCF002S_POWERON_OFF_1');
+  const light = featureOf(fan, 'light');
+  cloud.commandBehavior = 'reply-only';
+  const pending = gladys.fake.setValue(fan, light, 1);
+  await settle();
+  assert.deepEqual(await pending, { success: true });
+  await hub.refresh();
+  await settle();
+  assert.equal(gladys.fake.lastState(light.external_id), 1, 'stale REST state ignored');
+  t.mock.timers.tick(31_000);
+  await hub.refresh();
+  await settle();
+  assert.equal(gladys.fake.lastState(light.external_id), 0, 'REST wins afterwards');
 });

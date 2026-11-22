@@ -13,7 +13,7 @@ humidifiers, through the Dreo cloud — the REST API and WebSocket the Dreo app 
 | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | Tower fans (DR-HTF…)                           | on/off, speed (bounds of the model), mode, oscillation, room temperature                                 |
 | Air circulators, floor fans (DR-HAF…, DR-HPF…) | on/off, speed, mode, horizontal/vertical oscillation, room temperature                                   |
-| Ceiling fans (DR-HCF…)                         | fan on/off, speed, mode (including reverse)                                                              |
+| Ceiling fans (DR-HCF…)                         | fan on/off, speed, mode (including reverse); light and ambient light                                     |
 | Space heaters (DR-HSH…, WH…)                   | off (on only if allowed), target temperature, mode, heat level, room temperature, child lock (read-only) |
 | Air purifiers (DR-HAP…)                        | on/off, speed, mode, PM2.5, filter life (where reported in %)                                            |
 | Humidifiers (DR-HHM…)                          | on/off, mode, target humidity, mist level, humidity, water tank or water level                           |
@@ -61,8 +61,8 @@ The user documentation is in [`docs/`](docs/en.md) (English, French, German, Spa
 - Developed without the hardware (see above); models missing from the `hass-dreo` tables get default bounds.
 - Cloud only; the Dreo cloud API is not public and may change. Dreo publishes no quota: the integration stays far
   below the app's own traffic.
-- Not supported yet: air conditioners, dehumidifiers, misting fans, cookers; ceiling fan lights, ambient lights,
-  timers, display and sound settings.
+- Not supported yet: air conditioners, dehumidifiers, misting fans, cookers; ambient light effects, timers, display
+  and sound settings.
 - Dreo reports temperatures in °F; Gladys gets °C rounded to 0.1 (setpoints to the degree).
 
 ## Development
