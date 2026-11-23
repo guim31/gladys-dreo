@@ -292,6 +292,19 @@ test('dehumidifier: tank full fires the trigger once, with one log line each way
   assert.equal(logs.at('info').length, 2);
 });
 
+test('dehumidifier: a tank filled while the link was down fires on the rescan', async (t) => {
+  captureLogs(t, 'silent');
+  const { gladys, cloud } = await world(t);
+  const before = gladys.fake.sceneEvents.length;
+  cloud.states.HDH002S.wrong = { state: 1, timestamp: 1 };
+  await gladys.fake.action('refresh_devices');
+  await settle();
+  assert.equal(
+    gladys.fake.sceneEvents.slice(before).filter((e) => e.key === 'water_tank_full').length,
+    1,
+  );
+});
+
 test('dehumidifier: commands, and an unknown mode logged once', async (t) => {
   const logs = captureLogs(t, 'info');
   const { gladys, cloud } = await world(t);

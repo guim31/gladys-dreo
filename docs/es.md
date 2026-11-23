@@ -85,7 +85,7 @@ La velocidad va de 1 (baja) a 3 (alta), la humedad objetivo de 30 a 85 %. **Dep�
 aparato indica la alarma del depósito de agua (lleno o retirado): se ha detenido hasta que se vacíe el depósito.
 **Filtro por limpiar** pasa a _sí_ cuando las horas de funcionamiento desde la última limpieza alcanzan el aviso
 configurado en la aplicación Dreo (600 h por defecto). Por ahora solo se conocen los modos _Auto_ y _Continuo_: en
-otro modo (confort, secado de ropa…), el modo queda vacío y la integración anota en sus registros el valor recibido;
+otro modo (confort, secado de ropa…), el modo no se actualiza y la integración anota en sus registros el valor recibido;
 envíenoslo para que lo añadamos.
 
 ## Widget
@@ -147,10 +147,8 @@ inicio de sesión y luego una petición por aparato cada 10 minutos), y solo env
 - Desarrollada sin el hardware: los modelos son los de `hass-dreo`, los límites de un modelo ausente de sus tablas
   son estimaciones.
 - Solo nube: sin control local, nada funciona sin Internet.
-- Los efectos de la luz ambiental (ciclos de colores, escenas RGBIC), los temporizadores y los ajustes de pantalla y
-  sonido no están disponibles. El color de la luz ambiental solo se ofrece en los modelos que lo indican.
+- Los efectos de la luz ambiental (ciclos de colores, escenas RGBIC), los temporizadores y los ajustes de pantalla (salvo en los deshumidificadores) y sonido no están disponibles. El color de la luz ambiental solo se ofrece en los modelos que lo indican.
 - Los aires acondicionados, ventiladores nebulizadores y cocinas aún no son compatibles.
-- Deshumidificadores: las alarmas del depósito y del filtro, y los modos confort y secado de ropa, proceden del trabajo
-  de `hass-dreo`, no de un aparato: sus comentarios son bienvenidos.
+- Deshumidificadores: el significado de los códigos de alarma del depósito y de las horas del filtro es una hipótesis (`hass-dreo` no los describe), y los modos confort y secado de ropa son desconocidos: sus comentarios son bienvenidos.
 - Dreo indica las temperaturas en °F: la conversión redondea a 0,1 °C, y la temperatura objetivo al grado.
 - La API de la nube de Dreo no es pública: Dreo puede cambiarla sin previo aviso.

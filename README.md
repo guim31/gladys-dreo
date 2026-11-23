@@ -62,8 +62,7 @@ The user documentation is in [`docs/`](docs/en.md) (English, French, German, Spa
 - Developed without the hardware (see above); models missing from the `hass-dreo` tables get default bounds.
 - Cloud only; the Dreo cloud API is not public and may change. Dreo publishes no quota: the integration stays far
   below the app's own traffic.
-- Not supported yet: air conditioners, misting fans, cookers; ambient light effects, timers, display
-  and sound settings.
+- Not supported yet: air conditioners, misting fans, cookers; ambient light effects, timers, display (except on dehumidifiers) and sound settings.
 - Dreo reports temperatures in °F; Gladys gets °C rounded to 0.1 (setpoints to the degree).
 
 ## Development

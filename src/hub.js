@@ -268,8 +268,10 @@ export class DreoHub {
         // key missing from one answer must not drop (or add) a feature.
         devices.get(sn).caps = known.caps;
         devices.get(sn).unknownModes = known.unknownModes;
+        devices.get(sn).lastTank = known.lastTank;
       }
       this.noteUnknownMode(devices.get(sn));
+      this.checkTank(devices.get(sn));
     }
     const before = this.devices.size;
     this.devices = devices;
@@ -527,19 +529,34 @@ export class DreoHub {
   applyState(dev, state, { replace = false } = {}) {
     const wasOn = isOn(dev);
     const wasMode = currentMode(dev);
-    const wasFull = dev.caps.tankFull ? tankFull(dev.state) : null;
     dev.state = replace ? { ...state } : { ...dev.state, ...state };
     if (typeof state.connected === 'boolean' && state.connected !== dev.connected) {
       this.setConnected(dev, state.connected);
     }
-    const full = dev.caps.tankFull ? tankFull(dev.state) : null;
-    if (isOn(dev) !== wasOn || currentMode(dev) !== wasMode || full !== wasFull) {
+    const tankChanged = this.checkTank(dev);
+    if (isOn(dev) !== wasOn || currentMode(dev) !== wasMode || tankChanged) {
       this.requestWidgetRefresh();
     }
-    if (wasFull !== null && full !== null && full !== wasFull) {
-      this.onTankChanged(dev, full === 1);
-    }
     this.noteUnknownMode(dev);
+  }
+
+  /**
+   * Compares a dehumidifier's tank alarm with the last value seen (kept across
+   * rediscoveries and states that omit it); the first value seen fires nothing.
+   * Returns whether it changed.
+   */
+  checkTank(dev) {
+    const full = dev.caps.tankFull ? tankFull(dev.state) : null;
+    if (full === null) {
+      return false;
+    }
+    const last = dev.lastTank;
+    dev.lastTank = full;
+    if (last === undefined || last === full) {
+      return false;
+    }
+    this.onTankChanged(dev, full === 1);
+    return true;
   }
 
   /** A dehumidifier's tank alarm went on or off: one log line, and the trigger. */

@@ -80,8 +80,7 @@ it is empty; models with a water gauge show the level in percent instead.
 The fan speed goes from 1 (low) to 3 (high), the target humidity from 30 to 85 %. **Tank full** goes to _on_ when
 the device reports its water tank alarm (full or removed tank): it has stopped until the tank is emptied. **Filter to
 clean** goes to _on_ when the hours run since the last cleaning reach the reminder set in the Dreo app (600 h by
-default). Only the _Auto_ and _Continuous_ modes are known so far: in another mode (comfort, laundry drying…) the
-mode stays empty, and the integration logs the value it received — please send it to us so it can be added.
+default). Only the _Auto_ and _Continuous_ modes are known so far: in another mode (comfort, laundry drying…) the mode is not updated, and the integration logs the value it received — please send it to us so it can be added.
 
 ## Widget
 
@@ -140,10 +139,9 @@ only sends Gladys the values that changed.
 - Developed without the hardware: the models are those of `hass-dreo`, the bounds of a model missing from its
   tables are guesses.
 - Cloud only: no local control, no control while the Internet is down.
-- Ambient light effects (colour cycles, RGBIC scenes), timers, display and sound settings are not exposed. The
+- Ambient light effects (colour cycles, RGBIC scenes), timers, display (except on dehumidifiers) and sound settings are not exposed. The
   ambient light colour is offered only on the models that report it.
 - Air conditioners, misting fans and cookers are not supported yet.
-- Dehumidifiers: the tank and filter alarms, and the comfort and laundry modes, are read from the `hass-dreo` work, not
-  from a device: feedback welcome.
+- Dehumidifiers: the meaning of the tank alarm codes and of the filter hours is a guess (`hass-dreo` maps neither), and the comfort and laundry modes are unknown: feedback welcome.
 - Dreo reports temperatures in °F: the conversion rounds to 0.1 °C, and the target temperature to the degree.
 - The Dreo cloud API is not public: Dreo may change it without notice.

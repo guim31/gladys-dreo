@@ -85,7 +85,7 @@ Die Lüfterstufe geht von 1 (niedrig) bis 3 (hoch), die Zielfeuchtigkeit von 30 
 _an_, wenn das Gerät den Alarm des Wassertanks meldet (voll oder entnommen): Es steht, bis der Tank geleert ist.
 **Filter reinigen** geht auf _an_, wenn die Betriebsstunden seit der letzten Reinigung die Erinnerung aus der
 Dreo-App erreichen (standardmäßig 600 h). Bisher sind nur die Modi _Auto_ und _Dauerbetrieb_ bekannt: In einem
-anderen Modus (Komfort, Wäschetrocknung…) bleibt der Modus leer, und die Integration schreibt den empfangenen Wert ins
+anderen Modus (Komfort, Wäschetrocknung…) wird der Modus nicht aktualisiert, und die Integration schreibt den empfangenen Wert ins
 Log — schick ihn uns, damit wir ihn ergänzen.
 
 ## Widget
@@ -148,10 +148,8 @@ Anmeldung, dann eine Anfrage pro Gerät alle 10 Minuten), und schickt Gladys nur
 - Ohne die Hardware entwickelt: Die Modelle sind die von `hass-dreo`, die Grenzen eines Modells, das in seinen
   Tabellen fehlt, sind geschätzt.
 - Nur Cloud: keine lokale Steuerung, nichts funktioniert ohne Internet.
-- Effekte des Ambientelichts (Farbwechsel, RGBIC-Szenen), Timer, Anzeige- und Toneinstellungen werden nicht
-  angeboten. Die Farbe des Ambientelichts gibt es nur bei Modellen, die sie melden.
+- Effekte des Ambientelichts (Farbwechsel, RGBIC-Szenen), Timer, Anzeige- (außer bei Luftentfeuchtern) und Toneinstellungen werden nicht angeboten. Die Farbe des Ambientelichts gibt es nur bei Modellen, die sie melden.
 - Klimageräte, Sprühnebelventilatoren und Kochgeräte werden noch nicht unterstützt.
-- Luftentfeuchter: Tank- und Filteralarm sowie die Modi Komfort und Wäschetrocknung stammen aus der Arbeit von
-  `hass-dreo`, nicht von einem Gerät: Rückmeldungen sind willkommen.
+- Luftentfeuchter: Die Bedeutung der Tank-Alarmcodes und der Filterstunden ist eine Annahme (`hass-dreo` beschreibt sie nicht), und die Modi Komfort und Wäschetrocknung sind unbekannt: Rückmeldungen sind willkommen.
 - Dreo meldet Temperaturen in °F: Die Umrechnung rundet auf 0,1 °C, die Solltemperatur auf ganze Grad.
 - Die API der Dreo-Cloud ist nicht öffentlich: Dreo kann sie ohne Vorwarnung ändern.

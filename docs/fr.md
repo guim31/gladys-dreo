@@ -86,7 +86,7 @@ La vitesse va de 1 (faible) à 3 (forte), la consigne d'humidité de 30 à 85 %.
 l'appareil signale l'alerte du bac d'eau (bac plein ou retiré) : il s'est arrêté jusqu'à ce que le bac soit vidé.
 **Filtre à nettoyer** passe à _oui_ quand les heures de fonctionnement depuis le dernier nettoyage atteignent le
 rappel réglé dans l'application Dreo (600 h par défaut). Seuls les modes _Auto_ et _Continu_ sont connus pour
-l'instant : dans un autre mode (confort, séchage du linge…), le mode reste vide et l'intégration note dans ses
+l'instant : dans un autre mode (confort, séchage du linge…), le mode n'est pas mis à jour et l'intégration note dans ses
 journaux la valeur reçue — envoyez-la-nous pour qu'on l'ajoute.
 
 ## Widget
@@ -148,10 +148,8 @@ connexion, puis une requête par appareil toutes les 10 minutes), et n'envoie à
 - Développée sans le matériel : les modèles sont ceux de `hass-dreo`, les bornes d'un modèle absent de ses tables
   sont estimées.
 - Cloud uniquement : pas de commande locale, rien ne fonctionne sans Internet.
-- Les effets de l'éclairage d'ambiance (cycles de couleurs, scènes RGBIC), les minuteries, les réglages d'écran et de
-  son ne sont pas proposés. La couleur de l'ambiance n'est proposée que sur les modèles qui la renvoient.
+- Les effets de l'éclairage d'ambiance (cycles de couleurs, scènes RGBIC), les minuteries, les réglages d'écran (sauf sur les déshumidificateurs) et de son ne sont pas proposés. La couleur de l'ambiance n'est proposée que sur les modèles qui la renvoient.
 - Les climatiseurs, ventilateurs brumisateurs et cuiseurs ne sont pas encore pris en charge.
-- Déshumidificateurs : les alertes du bac et du filtre, et les modes confort et séchage du linge, viennent du travail
-  de `hass-dreo`, pas d'un appareil : vos retours sont les bienvenus.
+- Déshumidificateurs : le sens des codes d'alerte du bac et des heures du filtre est une hypothèse (`hass-dreo` ne les décrit pas), et les modes confort et séchage du linge sont inconnus : vos retours sont les bienvenus.
 - Dreo donne les températures en °F : la conversion arrondit au dixième de degré, et la consigne au degré.
 - L'API du cloud Dreo n'est pas publique : Dreo peut la changer sans prévenir.
