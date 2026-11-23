@@ -17,6 +17,7 @@ export const KINDS = [
   'heater',
   'purifier',
   'humidifier',
+  'dehumidifier',
 ];
 
 const PREFIXES = [
@@ -28,6 +29,7 @@ const PREFIXES = [
   ['WH', 'heater'],
   ['DR-HAP', 'purifier'],
   ['DR-HHM', 'humidifier'],
+  ['DR-HDH', 'dehumidifier'],
 ];
 
 /** The kind of a model, or null for the models this integration does not drive. */
@@ -80,6 +82,13 @@ const HUMIDIFIER_MODES = [
   ['auto', 1],
   ['sleep', 2],
 ];
+// Dehumidifiers (pydreo pydreodehumidifier.py): only these two values are
+// known. Other modes of the app (comfort, laundry drying) have values nobody
+// has reported yet: a device in one of them shows no mode (src/hub.js logs it).
+const DEHUMIDIFIER_MODES = [
+  ['auto', 1],
+  ['continuous', 2],
+];
 const HEATER_MODES = [
   ['hotair', 'hotair'],
   ['eco', 'eco'],
@@ -94,6 +103,8 @@ const KIND_DEFAULTS = {
   ceiling_fan: { speed: [1, 12], modes: CEILING_MODES, atmBrightness: [1, 5] },
   purifier: { speed: [1, 4], modes: PURIFIER_MODES },
   humidifier: { modes: HUMIDIFIER_MODES },
+  // DR-HDH001S to 005S: fan 1-3 (low, medium, high), target 30-85 % (pydreo).
+  dehumidifier: { speed: [1, 3], modes: DEHUMIDIFIER_MODES, targetHumidity: [30, 85] },
   heater: { heatLevels: [1, 3], ecoF: [41, 95], modes: HEATER_MODES },
 };
 
@@ -263,6 +274,7 @@ export function modelProfile(entry, state = {}) {
     filterLifePercent: table.filterLifePercent === true,
     atmBrightness: table.atmBrightness ?? defaults.atmBrightness ?? null,
     directColor: table.directColor === true,
+    targetHumidity: table.targetHumidity ?? defaults.targetHumidity ?? null,
   };
   if (model === 'DR-HTF007S' && /^CMS89F7518/.test(String(state.mcu_hardware_model ?? ''))) {
     profile.speed = [1, 4]; // older revision of the Nomad One S (pydreo)

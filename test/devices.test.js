@@ -48,7 +48,7 @@ test('models are sorted into kinds by their prefix, the others are left out', ()
   assert.equal(kindOfModel('DR-HAP007S'), 'purifier');
   assert.equal(kindOfModel('DR-HHM014S'), 'humidifier');
   assert.equal(kindOfModel('DR-HAC005S'), null);
-  assert.equal(kindOfModel('DR-HDH002S'), null);
+  assert.equal(kindOfModel('DR-HDH002S'), 'dehumidifier');
   assert.equal(kindOfModel(undefined), null);
 });
 
@@ -309,6 +309,61 @@ test('humidifier with a water gauge: water level in percent', () => {
   const humidifier = dev('HHM014S_2');
   assert.equal(featureValues(humidifier)['water-level'].state, 42);
   assert.equal(humidifier.caps.waterTank, undefined);
+});
+
+test('dehumidifier (DR-HDH002S): power, fan 1-3, modes, humidity, target, display, alarms', () => {
+  const dehumidifier = dev('HDH002S');
+  assert.equal(dehumidifier.profile.kind, 'dehumidifier');
+  assert.deepEqual(featureValues(dehumidifier), {
+    power: { state: 0 },
+    speed: { state: 2 },
+    mode: { text: 'auto' },
+    'target-humidity': { state: 50 },
+    temperature: { state: 19.4 }, // 67 °F
+    humidity: { state: 66 },
+    display: { state: 1 },
+    'tank-full': { state: 0 },
+    'filter-clean': { state: 0 },
+    'child-lock': { state: 0 },
+  });
+  assert.deepEqual(dehumidifier.caps.speed.range, [1, 3]);
+  assert.deepEqual(dehumidifier.caps.targetHumidity.range, [30, 85]);
+  assert.deepEqual(buildCommand(dehumidifier, 'power', 1, DEFAULT), { poweron: true });
+  assert.deepEqual(buildCommand(dehumidifier, 'speed', 3, DEFAULT), { windlevel: 3 });
+  assert.throws(() => buildCommand(dehumidifier, 'speed', 4, DEFAULT), /not valid/);
+  assert.deepEqual(buildCommand(dehumidifier, 'mode', 'continuous', DEFAULT), { mode: 2 });
+  assert.deepEqual(buildCommand(dehumidifier, 'target-humidity', 45, DEFAULT), {
+    rhautolevel: 45,
+  });
+  assert.throws(() => buildCommand(dehumidifier, 'target-humidity', 90, DEFAULT), /not valid/);
+  assert.deepEqual(buildCommand(dehumidifier, 'display', 0, DEFAULT), { lighton: false });
+  // Alarms are read-only.
+  assert.throws(() => buildCommand(dehumidifier, 'tank-full', 0, DEFAULT), /not valid/);
+  assert.throws(() => buildCommand(dehumidifier, 'filter-clean', 0, DEFAULT), /not valid/);
+});
+
+test('dehumidifier alarms: any tank code is full, the filter past its threshold', () => {
+  assert.equal(featureValues(dev('HDH002S', { wrong: 1 }))['tank-full'].state, 1);
+  assert.equal(featureValues(dev('HDH002S', { wrong: 3 }))['tank-full'].state, 1);
+  const filter = (worktime, filterthr) =>
+    featureValues(dev('HDH002S', { worktime, filterthr }))['filter-clean']?.state;
+  assert.equal(filter(599, 600), 0);
+  assert.equal(filter(600, 600), 1);
+  assert.equal(filter(10, 0), undefined, 'no threshold, no value');
+  // A mode value nobody has reported yet shows no mode rather than a wrong one.
+  assert.equal(featureValues(dev('HDH002S', { mode: 3 })).mode, undefined);
+});
+
+test('a dehumidifier without the alarm keys has no alarm feature', () => {
+  const bare = dev('HDH002S');
+  for (const key of ['wrong', 'worktime', 'filterthr', 'lighton', 'rhautolevel']) {
+    delete bare.state[key];
+  }
+  const caps = capabilities(bare.profile, bare.state);
+  assert.equal(caps.tankFull, undefined);
+  assert.equal(caps.filterClean, undefined);
+  assert.equal(caps.display, undefined);
+  assert.equal(caps.targetHumidity, undefined);
 });
 
 test('a value the device did not report is not published', () => {

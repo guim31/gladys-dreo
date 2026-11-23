@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { TRIGGER_CONNECTION } from '../src/hub.js';
+import { TRIGGER_CONNECTION, TRIGGER_TANK_FULL } from '../src/hub.js';
 import { GROUPS } from '../src/scenes.js';
 import { SCENE_ACTIONS } from '../src/scenes.js';
 import { WIDGETS } from '../src/widgets.js';
@@ -33,7 +33,7 @@ const allFields = [
 // Actions registered by src/app.js.
 const HANDLED_ACTIONS = ['refresh_devices'];
 // Scene triggers the code fires (src/hub.js).
-const SCENE_TRIGGER_KEYS = [TRIGGER_CONNECTION];
+const SCENE_TRIGGER_KEYS = [TRIGGER_CONNECTION, TRIGGER_TANK_FULL];
 
 // Manifest fields older Gladys releases reject as unknown, with the first
 // release accepting them. The store validator refuses a manifest whose

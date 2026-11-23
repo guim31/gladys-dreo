@@ -1,6 +1,6 @@
 # Dreo
 
-Controle sus ventiladores, calefactores, purificadores de aire y humidificadores **Dreo** desde Gladys, a través
+Controle sus ventiladores, calefactores, purificadores de aire, humidificadores y deshumidificadores **Dreo** desde Gladys, a través
 de la nube de Dreo — el mismo servicio que utiliza la aplicación Dreo. Los estados llegan en tiempo real: una
 velocidad cambiada con el mando o en la aplicación aparece en Gladys en un segundo.
 
@@ -10,16 +10,17 @@ velocidad cambiada con el mando o en la aplicación aparece en Gladys en un segu
 
 ## Presentación
 
-| Aparato Dreo                                                  | Lo que obtiene en Gladys                                                                                                                            |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ventiladores de torre (DR-HTF…)                               | encendido, velocidad, modo, oscilación, temperatura de la habitación                                                                                |
-| Circuladores de aire / ventiladores de pie (DR-HAF…, DR-HPF…) | encendido, velocidad, modo, oscilación (horizontal y vertical), temperatura de la habitación                                                        |
-| Ventiladores de techo (DR-HCF…)                               | encendido del ventilador, velocidad, modo (incluido inverso); luz: encendido, brillo, temperatura de color; luz ambiental: encendido, brillo, color |
-| Calefactores (DR-HSH…, WH…)                                   | encendido (vea la parte de seguridad), temperatura objetivo, modo, nivel de calor, temperatura de la habitación, bloqueo infantil (solo lectura)    |
-| Purificadores de aire (DR-HAP…)                               | encendido, velocidad, modo, PM2.5, vida útil del filtro (si se indica en %)                                                                         |
-| Humidificadores (DR-HHM…)                                     | encendido, modo, humedad objetivo, nivel de vapor, humedad, depósito o nivel de agua                                                                |
+| Aparato Dreo                                                  | Lo que obtiene en Gladys                                                                                                                                                               |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ventiladores de torre (DR-HTF…)                               | encendido, velocidad, modo, oscilación, temperatura de la habitación                                                                                                                   |
+| Circuladores de aire / ventiladores de pie (DR-HAF…, DR-HPF…) | encendido, velocidad, modo, oscilación (horizontal y vertical), temperatura de la habitación                                                                                           |
+| Ventiladores de techo (DR-HCF…)                               | encendido del ventilador, velocidad, modo (incluido inverso); luz: encendido, brillo, temperatura de color; luz ambiental: encendido, brillo, color                                    |
+| Calefactores (DR-HSH…, WH…)                                   | encendido (vea la parte de seguridad), temperatura objetivo, modo, nivel de calor, temperatura de la habitación, bloqueo infantil (solo lectura)                                       |
+| Purificadores de aire (DR-HAP…)                               | encendido, velocidad, modo, PM2.5, vida útil del filtro (si se indica en %)                                                                                                            |
+| Humidificadores (DR-HHM…)                                     | encendido, modo, humedad objetivo, nivel de vapor, humedad, depósito o nivel de agua                                                                                                   |
+| Deshumidificadores (DR-HDH…)                                  | encendido, velocidad (baja, media, alta), modo, humedad objetivo, humedad, temperatura de la habitación, pantalla, depósito lleno, filtro por limpiar, bloqueo infantil (solo lectura) |
 
-Los demás productos Dreo (aires acondicionados, deshumidificadores, ventiladores nebulizadores, cocinas) aparecen
+Los demás productos Dreo (aires acondicionados, ventiladores nebulizadores, cocinas) aparecen
 con el botón «Actualizar los aparatos» como «aún no compatible».
 
 ## Requisitos
@@ -78,6 +79,15 @@ porcentaje.
 La humedad objetivo (30 a 90 %) es la del modo actual (automático o sueño). El depósito muestra _Bajo_ cuando está
 vacío; los modelos con indicador muestran en su lugar el nivel en porcentaje.
 
+### Deshumidificadores
+
+La velocidad va de 1 (baja) a 3 (alta), la humedad objetivo de 30 a 85 %. **Depósito lleno** pasa a _sí_ cuando el
+aparato indica la alarma del depósito de agua (lleno o retirado): se ha detenido hasta que se vacíe el depósito.
+**Filtro por limpiar** pasa a _sí_ cuando las horas de funcionamiento desde la última limpieza alcanzan el aviso
+configurado en la aplicación Dreo (600 h por defecto). Por ahora solo se conocen los modos _Auto_ y _Continuo_: en
+otro modo (confort, secado de ropa…), el modo queda vacío y la integración anota en sus registros el valor recibido;
+envíenoslo para que lo añadamos.
+
 ## Widget
 
 El widget **Aparatos Dreo** muestra todos los aparatos Dreo añadidos a Gladys en una tarjeta — encendidos, apagados
@@ -90,13 +100,18 @@ desde el editor del panel.
 caído) o la ha recuperado. Elija un aparato y/o el cambio, o déjelos vacíos. Variables: el nombre del aparato y el
 nuevo estado (`online` u `offline`).
 
+**Depósito lleno de un deshumidificador Dreo**: el depósito de agua de un deshumidificador está lleno (o retirado) y
+el aparato se ha detenido. Elija un deshumidificador o déjelo vacío. Variable: el nombre del aparato.
+
 ## Acción de escena
 
 **Apagar los aparatos Dreo**: apaga todos los aparatos Dreo añadidos a Gladys que estén encendidos, o solo los tipos
-elegidos (ventiladores, calefactores, purificadores, humidificadores). Salida: el número de aparatos apagados.
+elegidos (ventiladores, calefactores, purificadores, humidificadores, deshumidificadores). Salida: el número de aparatos apagados.
 
 ## Ejemplos de escenas
 
+- **Depósito lleno**: cuando se dispare _Depósito lleno de un deshumidificador Dreo_, envíese el mensaje «Vaciar el
+  deshumidificador».
 - **Salir de casa**: cuando sale la última persona, ejecute _Apagar los aparatos Dreo_ con el tipo _Calefactores_ y
   envíese un mensaje con el número de aparatos apagados.
 - **Demasiado calor en el dormitorio**: cuando la temperatura del dormitorio supera los 26 °C después de las 22 h,
@@ -134,6 +149,8 @@ inicio de sesión y luego una petición por aparato cada 10 minutos), y solo env
 - Solo nube: sin control local, nada funciona sin Internet.
 - Los efectos de la luz ambiental (ciclos de colores, escenas RGBIC), los temporizadores y los ajustes de pantalla y
   sonido no están disponibles. El color de la luz ambiental solo se ofrece en los modelos que lo indican.
-- Los aires acondicionados, deshumidificadores, ventiladores nebulizadores y cocinas aún no son compatibles.
+- Los aires acondicionados, ventiladores nebulizadores y cocinas aún no son compatibles.
+- Deshumidificadores: las alarmas del depósito y del filtro, y los modos confort y secado de ropa, proceden del trabajo
+  de `hass-dreo`, no de un aparato: sus comentarios son bienvenidos.
 - Dreo indica las temperaturas en °F: la conversión redondea a 0,1 °C, y la temperatura objetivo al grado.
 - La API de la nube de Dreo no es pública: Dreo puede cambiarla sin previo aviso.

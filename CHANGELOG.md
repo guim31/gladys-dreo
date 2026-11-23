@@ -10,6 +10,17 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+### Added
+
+- Dreo dehumidifiers (DR-HDH…, such as the DR-HDH002S): on/off, fan speed (low,
+  medium, high), mode (auto, continuous), target humidity (30-85 %), humidity,
+  room temperature, display on/off, child lock (read-only), and two alarms:
+  "Water tank full" and "Filter to clean". A new scene trigger, "Dreo
+  dehumidifier tank full", fires when the tank alarm stops the device. The
+  "Turn off Dreo devices" scene action can target dehumidifiers.
+- A mode value the integration does not know is logged once, so its owner can
+  report it.
+
 ## [1.1.0] - 2026-11-22
 
 ### Added

@@ -24,6 +24,9 @@ export const NAMES = {
     waterLevel: 'Water level',
     waterTank: 'Water tank',
     filterLife: 'Filter life',
+    display: 'Display',
+    tankFull: 'Water tank full',
+    filterClean: 'Filter to clean',
 
     light: 'Light',
     lightBrightness: 'Light brightness',
@@ -48,6 +51,9 @@ export const NAMES = {
     waterLevel: "Niveau d'eau",
     waterTank: "Réservoir d'eau",
     filterLife: 'Durée de vie du filtre',
+    display: 'Écran',
+    tankFull: 'Bac plein',
+    filterClean: 'Filtre à nettoyer',
 
     light: 'Lumière',
     lightBrightness: 'Luminosité de la lumière',
@@ -72,6 +78,9 @@ export const NAMES = {
     waterLevel: 'Wasserstand',
     waterTank: 'Wassertank',
     filterLife: 'Filterlebensdauer',
+    display: 'Display',
+    tankFull: 'Wassertank voll',
+    filterClean: 'Filter reinigen',
 
     light: 'Licht',
     lightBrightness: 'Lichthelligkeit',
@@ -96,6 +105,9 @@ export const NAMES = {
     waterLevel: 'Nivel de agua',
     waterTank: 'Depósito de agua',
     filterLife: 'Vida útil del filtro',
+    display: 'Pantalla',
+    tankFull: 'Depósito lleno',
+    filterClean: 'Filtro por limpiar',
 
     light: 'Luz',
     lightBrightness: 'Brillo de la luz',
@@ -120,6 +132,7 @@ export const MODE_LABELS = {
     hotair: 'Heat',
     eco: 'Eco',
     coolair: 'Fan only',
+    continuous: 'Continuous',
   },
   fr: {
     normal: 'Normal',
@@ -133,6 +146,7 @@ export const MODE_LABELS = {
     hotair: 'Chauffage',
     eco: 'Éco',
     coolair: 'Ventilation seule',
+    continuous: 'Continu',
   },
   de: {
     normal: 'Normal',
@@ -146,6 +160,7 @@ export const MODE_LABELS = {
     hotair: 'Heizen',
     eco: 'Eco',
     coolair: 'Nur Lüfter',
+    continuous: 'Dauerbetrieb',
   },
   es: {
     normal: 'Normal',
@@ -159,6 +174,7 @@ export const MODE_LABELS = {
     hotair: 'Calefacción',
     eco: 'Eco',
     coolair: 'Solo ventilador',
+    continuous: 'Continuo',
   },
 };
 
@@ -247,6 +263,7 @@ export const WORDS = {
     nothingToTurnOff: 'Nothing to turn off.',
     noDevice: 'No Dreo device added to Gladys yet.',
     disconnected: 'Dreo cloud unreachable',
+    tankFull: 'tank full',
   },
   fr: {
     none: 'Aucun appareil Dreo sur ce compte.',
@@ -261,6 +278,7 @@ export const WORDS = {
     nothingToTurnOff: 'Rien à éteindre.',
     noDevice: "Aucun appareil Dreo ajouté à Gladys pour l'instant.",
     disconnected: 'Cloud Dreo injoignable',
+    tankFull: 'bac plein',
   },
   de: {
     none: 'Kein Dreo-Gerät in diesem Konto.',
@@ -275,6 +293,7 @@ export const WORDS = {
     nothingToTurnOff: 'Nichts auszuschalten.',
     noDevice: 'Noch kein Dreo-Gerät zu Gladys hinzugefügt.',
     disconnected: 'Dreo-Cloud nicht erreichbar',
+    tankFull: 'Tank voll',
   },
   es: {
     none: 'Ningún aparato Dreo en esta cuenta.',
@@ -289,6 +308,7 @@ export const WORDS = {
     nothingToTurnOff: 'Nada que apagar.',
     noDevice: 'Aún no se ha añadido ningún aparato Dreo a Gladys.',
     disconnected: 'Nube de Dreo inaccesible',
+    tankFull: 'depósito lleno',
   },
 };
 

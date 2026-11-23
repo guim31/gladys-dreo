@@ -33,6 +33,7 @@ import {
   deviceIds,
   featureValues,
   isOn,
+  tankFull,
 } from './devices.js';
 import { MESSAGES, UserError } from './i18n.js';
 import { IssueLog } from './issues.js';
@@ -51,6 +52,7 @@ export const TIMINGS = {
 
 export const WIDGET_KEY = 'overview';
 export const TRIGGER_CONNECTION = 'connection_changed';
+export const TRIGGER_TANK_FULL = 'water_tank_full';
 
 const STATE_METHODS = new Set(['report', 'control-report', 'device-online']);
 const ACK_METHODS = new Set(['control-reply', 'control-report']);
@@ -265,7 +267,9 @@ export class DreoHub {
         // A device keeps the structure Gladys knows across rediscoveries: a
         // key missing from one answer must not drop (or add) a feature.
         devices.get(sn).caps = known.caps;
+        devices.get(sn).unknownModes = known.unknownModes;
       }
+      this.noteUnknownMode(devices.get(sn));
     }
     const before = this.devices.size;
     this.devices = devices;
@@ -523,12 +527,55 @@ export class DreoHub {
   applyState(dev, state, { replace = false } = {}) {
     const wasOn = isOn(dev);
     const wasMode = currentMode(dev);
+    const wasFull = dev.caps.tankFull ? tankFull(dev.state) : null;
     dev.state = replace ? { ...state } : { ...dev.state, ...state };
     if (typeof state.connected === 'boolean' && state.connected !== dev.connected) {
       this.setConnected(dev, state.connected);
     }
-    if (isOn(dev) !== wasOn || currentMode(dev) !== wasMode) {
+    const full = dev.caps.tankFull ? tankFull(dev.state) : null;
+    if (isOn(dev) !== wasOn || currentMode(dev) !== wasMode || full !== wasFull) {
       this.requestWidgetRefresh();
+    }
+    if (wasFull !== null && full !== null && full !== wasFull) {
+      this.onTankChanged(dev, full === 1);
+    }
+    this.noteUnknownMode(dev);
+  }
+
+  /** A dehumidifier's tank alarm went on or off: one log line, and the trigger. */
+  onTankChanged(dev, full) {
+    logger.info(
+      full
+        ? `${dev.name}: water tank full (code ${dev.state.wrong}), the device stops`
+        : `${dev.name}: water tank emptied`,
+    );
+    if (!full || !this.isCreated(dev)) {
+      return;
+    }
+    this.gladys
+      .publishSceneEvent(TRIGGER_TANK_FULL, {
+        device: deviceIds(this.gladys, dev.sn).device,
+        device_name: dev.name,
+      })
+      .catch((err) => logger.debug(`Cannot fire ${TRIGGER_TANK_FULL}: ${err.message}`));
+  }
+
+  /**
+   * A mode value missing from the model's list (the comfort and laundry modes
+   * of the dehumidifiers are unknown): logged once per value, so an owner can
+   * report it and the list can grow.
+   */
+  noteUnknownMode(dev) {
+    const { caps, state } = dev;
+    // The heater combo has no mode while it is off: not a missing value.
+    const value = caps.mode && !caps.heaterCombo ? state[caps.mode.key] : undefined;
+    if (value === undefined || value === null || value === '' || currentMode(dev) !== null) {
+      return;
+    }
+    dev.unknownModes ??= new Set();
+    if (!dev.unknownModes.has(value)) {
+      dev.unknownModes.add(value);
+      logger.info(`${dev.name} (${dev.model}): unknown mode ${JSON.stringify(value)}, not shown`);
     }
   }
 
