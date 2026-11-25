@@ -3,10 +3,10 @@
   "type": "device",
   "name": "Dreo",
   "description": {
-    "en": "Dreo fans, heaters, air purifiers and humidifiers through the Dreo cloud.",
-    "fr": "Ventilateurs, chauffages, purificateurs et humidificateurs Dreo, par le cloud Dreo.",
-    "de": "Dreo-Ventilatoren, Heizlüfter, Luftreiniger und Luftbefeuchter über die Dreo-Cloud.",
-    "es": "Ventiladores, calefactores, purificadores y humidificadores Dreo, por la nube Dreo."
+    "en": "Dreo fans, heaters, air purifiers, humidifiers and dehumidifiers through the Dreo cloud.",
+    "fr": "Ventilateurs, chauffages, purificateurs, humidificateurs et déshumidificateurs Dreo, via le cloud.",
+    "de": "Dreo-Ventilatoren, Heizlüfter, Luftreiniger, Be- und Entfeuchter über die Dreo-Cloud.",
+    "es": "Ventiladores, calefactores, purificadores, humidificadores y deshumidificadores Dreo, por la nube."
   },
   "version": "1.1.0",
   "docker_image": "ghcr.io/guim31/gladys-dreo:1.1.0",
@@ -297,6 +297,52 @@
           }
         }
       ]
+    },
+    {
+      "key": "water_tank_full",
+      "label": {
+        "en": "Dreo dehumidifier tank full",
+        "fr": "Bac plein d'un déshumidificateur Dreo",
+        "de": "Wassertank eines Dreo-Luftentfeuchters voll",
+        "es": "Depósito lleno de un deshumidificador Dreo"
+      },
+      "description": {
+        "en": "The water tank of a Dreo dehumidifier is full (or removed): the device has stopped until it is emptied.",
+        "fr": "Le bac d'eau d'un déshumidificateur Dreo est plein (ou retiré) : l'appareil s'est arrêté jusqu'à ce qu'il soit vidé.",
+        "de": "Der Wassertank eines Dreo-Luftentfeuchters ist voll (oder entnommen): Das Gerät steht, bis er geleert ist.",
+        "es": "El depósito de agua de un deshumidificador Dreo está lleno (o retirado): el aparato se ha detenido hasta que se vacíe."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Device",
+            "fr": "Appareil",
+            "de": "Gerät",
+            "es": "Aparato"
+          },
+          "description": {
+            "en": "Leave empty for any Dreo dehumidifier.",
+            "fr": "Laissez vide pour n'importe quel déshumidificateur Dreo.",
+            "de": "Leer lassen für jeden Dreo-Luftentfeuchter.",
+            "es": "Déjelo vacío para cualquier deshumidificador Dreo."
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "device_name",
+          "type": "string",
+          "label": {
+            "en": "Device name",
+            "fr": "Nom de l'appareil",
+            "de": "Gerätename",
+            "es": "Nombre del aparato"
+          }
+        }
+      ]
     }
   ],
   "scene_actions": [
@@ -367,6 +413,15 @@
                 "fr": "Humidificateurs",
                 "de": "Luftbefeuchter",
                 "es": "Humidificadores"
+              }
+            },
+            {
+              "value": "dehumidifiers",
+              "label": {
+                "en": "Dehumidifiers",
+                "fr": "Déshumidificateurs",
+                "de": "Luftentfeuchter",
+                "es": "Deshumidificadores"
               }
             }
           ]

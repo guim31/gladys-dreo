@@ -48,7 +48,7 @@ test('start: login, every device discovered, states and badges of the added ones
   captureLogs(t, 'silent');
   const { gladys, cloud } = await world(t);
   assert.deepEqual(gladys.fake.connectionStatus, { connected: true });
-  assert.equal(gladys.fake.discoveredDevices.length, 19);
+  assert.equal(gladys.fake.discoveredDevices.length, 20);
   const fan = deviceOf(gladys, 'HTF017S_1');
   assert.equal(fan.name, 'Tower Fan (DR-HTF017S)');
   assert.equal(fan.should_poll, false);
@@ -66,7 +66,7 @@ test('nothing is published for devices the user did not add', async (t) => {
   captureLogs(t, 'silent');
   const { gladys } = await world(t, { created: false });
   assert.equal(gladys.fake.states.length, 0);
-  assert.equal(gladys.fake.discoveredDevices.length, 19);
+  assert.equal(gladys.fake.discoveredDevices.length, 20);
 });
 
 test('a state the device reports over the WebSocket is published at once', async (t) => {
@@ -259,6 +259,73 @@ test('a device going offline: unreachable badge, trigger, commands refused, and 
   assert.equal(gladys.fake.lastState(featureOf(fan, 'power').external_id), 1);
 });
 
+test('dehumidifier: tank full fires the trigger once, with one log line each way', async (t) => {
+  const logs = captureLogs(t, 'info');
+  const { gladys, cloud } = await world(t);
+  const dehumidifier = deviceOf(gladys, 'HDH002S');
+  const tank = featureOf(dehumidifier, 'tank-full');
+  assert.equal(tank.category, 'input');
+  assert.equal(gladys.fake.lastState(tank.external_id), 0);
+  logs.clear();
+  const before = gladys.fake.sceneEvents.length;
+  cloud.report('HDH002S', { wrong: 1, poweron: false });
+  await settle();
+  cloud.report('HDH002S', { wrong: 1 });
+  await settle();
+  assert.equal(gladys.fake.lastState(tank.external_id), 1);
+  const fired = gladys.fake.sceneEvents.slice(before);
+  assert.deepEqual(fired, [
+    {
+      key: 'water_tank_full',
+      data: { device: dehumidifier.external_id, device_name: dehumidifier.name },
+    },
+  ]);
+  const widget = await gladys.fake.widgetGet('overview', { language: 'fr' });
+  const row = widget.data.content.components
+    .find((c) => c.type === 'status')
+    .items.find((item) => item.label === dehumidifier.name);
+  assert.ok(!row || row.value === 'bac plein');
+  cloud.report('HDH002S', { wrong: 0 });
+  await settle();
+  assert.equal(gladys.fake.lastState(tank.external_id), 0);
+  assert.equal(gladys.fake.sceneEvents.length, before + 1, 'no trigger when emptied');
+  assert.equal(logs.at('info').length, 2);
+});
+
+test('dehumidifier: a tank filled while the link was down fires on the rescan', async (t) => {
+  captureLogs(t, 'silent');
+  const { gladys, cloud } = await world(t);
+  const before = gladys.fake.sceneEvents.length;
+  cloud.states.HDH002S.wrong = { state: 1, timestamp: 1 };
+  await gladys.fake.action('refresh_devices');
+  await settle();
+  assert.equal(
+    gladys.fake.sceneEvents.slice(before).filter((e) => e.key === 'water_tank_full').length,
+    1,
+  );
+});
+
+test('dehumidifier: commands, and an unknown mode logged once', async (t) => {
+  const logs = captureLogs(t, 'info');
+  const { gladys, cloud } = await world(t);
+  const dehumidifier = deviceOf(gladys, 'HDH002S');
+  const before = cloud.commands.length;
+  const ack = await gladys.fake.setValue(
+    dehumidifier,
+    featureOf(dehumidifier, 'target-humidity'),
+    45,
+  );
+  assert.deepEqual(ack, { success: true });
+  assert.deepEqual(cloud.commands.slice(before)[0].params, { rhautolevel: 45 });
+  logs.clear();
+  cloud.report('HDH002S', { mode: 3 });
+  await settle();
+  cloud.report('HDH002S', { mode: 3 });
+  await settle();
+  const unknown = logs.at('info').filter((line) => line.includes('unknown mode 3'));
+  assert.equal(unknown.length, 1);
+});
+
 test('quiet logs: a normal cycle writes nothing at the info level', async (t) => {
   t.mock.timers.enable(TIMERS);
   const { gladys, cloud } = await world(t);
@@ -318,7 +385,7 @@ test('a refused account: status in Gladys, one error line, no login loop', async
   await gladys.fake.configUpdated({ ...ACCOUNT });
   await settle();
   assert.deepEqual(gladys.fake.connectionStatus, { connected: true });
-  assert.equal(gladys.fake.discoveredDevices.length, 19);
+  assert.equal(gladys.fake.discoveredDevices.length, 20);
 });
 
 test('an unreachable cloud at start: retried, one line when it starts, one when it ends', async (t) => {

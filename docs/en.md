@@ -1,6 +1,6 @@
 # Dreo
 
-Control your **Dreo** fans, heaters, air purifiers and humidifiers from Gladys, through the Dreo cloud — the
+Control your **Dreo** fans, heaters, air purifiers, humidifiers and dehumidifiers from Gladys, through the Dreo cloud — the
 same service the Dreo app uses. States arrive in real time: a speed changed on the remote or in the app shows up
 in Gladys within a second.
 
@@ -10,16 +10,17 @@ in Gladys within a second.
 
 ## Overview
 
-| Dreo device                                     | What you get in Gladys                                                                                                                |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Tower fans (DR-HTF…)                            | on/off, speed, mode, oscillation, room temperature                                                                                    |
-| Air circulators / floor fans (DR-HAF…, DR-HPF…) | on/off, speed, mode, oscillation (horizontal and vertical), room temperature                                                          |
-| Ceiling fans (DR-HCF…)                          | fan on/off, speed, mode (including reverse); light: on/off, brightness, colour temperature; ambient light: on/off, brightness, colour |
-| Heaters (DR-HSH…, WH…)                          | on/off (see the safety section), target temperature, mode, heat level, room temperature, child lock (read-only)                       |
-| Air purifiers (DR-HAP…)                         | on/off, speed, mode, PM2.5, filter life (where reported in %)                                                                         |
-| Humidifiers (DR-HHM…)                           | on/off, mode, target humidity, mist level, humidity, water tank or water level                                                        |
+| Dreo device                                     | What you get in Gladys                                                                                                                                |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tower fans (DR-HTF…)                            | on/off, speed, mode, oscillation, room temperature                                                                                                    |
+| Air circulators / floor fans (DR-HAF…, DR-HPF…) | on/off, speed, mode, oscillation (horizontal and vertical), room temperature                                                                          |
+| Ceiling fans (DR-HCF…)                          | fan on/off, speed, mode (including reverse); light: on/off, brightness, colour temperature; ambient light: on/off, brightness, colour                 |
+| Heaters (DR-HSH…, WH…)                          | on/off (see the safety section), target temperature, mode, heat level, room temperature, child lock (read-only)                                       |
+| Air purifiers (DR-HAP…)                         | on/off, speed, mode, PM2.5, filter life (where reported in %)                                                                                         |
+| Humidifiers (DR-HHM…)                           | on/off, mode, target humidity, mist level, humidity, water tank or water level                                                                        |
+| Dehumidifiers (DR-HDH…)                         | on/off, fan speed (low, medium, high), mode, target humidity, humidity, room temperature, display, tank full, filter to clean, child lock (read-only) |
 
-Other Dreo products (air conditioners, dehumidifiers, misting fans, cookers) are listed by the "Refresh the
+Other Dreo products (air conditioners, misting fans, cookers) are listed by the "Refresh the
 devices" button as "not supported yet".
 
 ## Requirements
@@ -74,6 +75,13 @@ automatically. The filter life is shown on the models that report it in percent.
 The target humidity (30 to 90 %) is the one of the current mode (auto or sleep). The water tank shows _Low_ when
 it is empty; models with a water gauge show the level in percent instead.
 
+### Dehumidifiers
+
+The fan speed goes from 1 (low) to 3 (high), the target humidity from 30 to 85 %. **Tank full** goes to _on_ when
+the device reports its water tank alarm (full or removed tank): it has stopped until the tank is emptied. **Filter to
+clean** goes to _on_ when the hours run since the last cleaning reach the reminder set in the Dreo app (600 h by
+default). Only the _Auto_ and _Continuous_ modes are known so far: in another mode (comfort, laundry drying…) the mode is not updated, and the integration logs the value it received — please send it to us so it can be added.
+
 ## Widget
 
 The **Dreo devices** widget shows every Dreo device added to Gladys on one card — on, off or offline, with its
@@ -86,13 +94,17 @@ editor.
 it back. Choose a device and/or the change, or leave them empty. Variables: the device name and the new state
 (`online` or `offline`).
 
+**Dreo dehumidifier tank full**: the water tank of a dehumidifier is full (or removed) and the device has stopped.
+Choose a dehumidifier or leave it empty. Variable: the device name.
+
 ## Scene action
 
 **Turn off Dreo devices**: turns off every Dreo device added to Gladys that is on, or only the chosen kinds
-(fans, heaters, air purifiers, humidifiers). Output: the number of devices turned off.
+(fans, heaters, air purifiers, humidifiers, dehumidifiers). Output: the number of devices turned off.
 
 ## Scene examples
 
+- **Tank full**: when _Dreo dehumidifier tank full_ fires, send yourself a message “Empty the dehumidifier”.
 - **Leaving home**: when the last person leaves, run _Turn off Dreo devices_ with the kind _Heaters_, then send
   yourself a message with the number of devices turned off.
 - **Too hot in the bedroom**: when the bedroom temperature goes over 26 °C after 10 pm, turn the tower fan on in
@@ -127,8 +139,9 @@ only sends Gladys the values that changed.
 - Developed without the hardware: the models are those of `hass-dreo`, the bounds of a model missing from its
   tables are guesses.
 - Cloud only: no local control, no control while the Internet is down.
-- Ambient light effects (colour cycles, RGBIC scenes), timers, display and sound settings are not exposed. The
+- Ambient light effects (colour cycles, RGBIC scenes), timers, display (except on dehumidifiers) and sound settings are not exposed. The
   ambient light colour is offered only on the models that report it.
-- Air conditioners, dehumidifiers, misting fans and cookers are not supported yet.
+- Air conditioners, misting fans and cookers are not supported yet.
+- Dehumidifiers: the meaning of the tank alarm codes and of the filter hours is a guess (`hass-dreo` maps neither), and the comfort and laundry modes are unknown: feedback welcome.
 - Dreo reports temperatures in °F: the conversion rounds to 0.1 °C, and the target temperature to the degree.
 - The Dreo cloud API is not public: Dreo may change it without notice.

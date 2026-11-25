@@ -1,6 +1,6 @@
 # Dreo
 
-Pilotez vos ventilateurs, chauffages, purificateurs d'air et humidificateurs **Dreo** depuis Gladys, par le cloud
+Pilotez vos ventilateurs, chauffages, purificateurs d'air, humidificateurs et déshumidificateurs **Dreo** depuis Gladys, par le cloud
 Dreo — le service qu'utilise l'application Dreo. Les états arrivent en temps réel : une vitesse changée à la
 télécommande ou dans l'application s'affiche dans Gladys en une seconde.
 
@@ -10,16 +10,17 @@ télécommande ou dans l'application s'affiche dans Gladys en une seconde.
 
 ## Présentation
 
-| Appareil Dreo                                              | Ce que vous obtenez dans Gladys                                                                                                                                                   |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ventilateurs colonne (DR-HTF…)                             | marche/arrêt, vitesse, mode, oscillation, température de la pièce                                                                                                                 |
-| Brasseurs d'air / ventilateurs sur pied (DR-HAF…, DR-HPF…) | marche/arrêt, vitesse, mode, oscillation (horizontale et verticale), température de la pièce                                                                                      |
-| Ventilateurs de plafond (DR-HCF…)                          | marche/arrêt du ventilateur, vitesse, mode (dont inversé) ; lumière : marche/arrêt, luminosité, température de couleur ; éclairage d'ambiance : marche/arrêt, luminosité, couleur |
-| Chauffages (DR-HSH…, WH…)                                  | marche/arrêt (voir la partie sécurité), consigne, mode, puissance, température de la pièce, sécurité enfant (lecture seule)                                                       |
-| Purificateurs d'air (DR-HAP…)                              | marche/arrêt, vitesse, mode, PM2.5, durée de vie du filtre (si exprimée en %)                                                                                                     |
-| Humidificateurs (DR-HHM…)                                  | marche/arrêt, mode, consigne d'humidité, brumisation, humidité, réservoir ou niveau d'eau                                                                                         |
+| Appareil Dreo                                              | Ce que vous obtenez dans Gladys                                                                                                                                                    |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ventilateurs colonne (DR-HTF…)                             | marche/arrêt, vitesse, mode, oscillation, température de la pièce                                                                                                                  |
+| Brasseurs d'air / ventilateurs sur pied (DR-HAF…, DR-HPF…) | marche/arrêt, vitesse, mode, oscillation (horizontale et verticale), température de la pièce                                                                                       |
+| Ventilateurs de plafond (DR-HCF…)                          | marche/arrêt du ventilateur, vitesse, mode (dont inversé) ; lumière : marche/arrêt, luminosité, température de couleur ; éclairage d'ambiance : marche/arrêt, luminosité, couleur  |
+| Chauffages (DR-HSH…, WH…)                                  | marche/arrêt (voir la partie sécurité), consigne, mode, puissance, température de la pièce, sécurité enfant (lecture seule)                                                        |
+| Purificateurs d'air (DR-HAP…)                              | marche/arrêt, vitesse, mode, PM2.5, durée de vie du filtre (si exprimée en %)                                                                                                      |
+| Humidificateurs (DR-HHM…)                                  | marche/arrêt, mode, consigne d'humidité, brumisation, humidité, réservoir ou niveau d'eau                                                                                          |
+| Déshumidificateurs (DR-HDH…)                               | marche/arrêt, vitesse (faible, moyenne, forte), mode, consigne d'humidité, humidité, température de la pièce, écran, bac plein, filtre à nettoyer, sécurité enfant (lecture seule) |
 
-Les autres produits Dreo (climatiseurs, déshumidificateurs, ventilateurs brumisateurs, cuiseurs) sont listés par
+Les autres produits Dreo (climatiseurs, ventilateurs brumisateurs, cuiseurs) sont listés par
 le bouton « Actualiser les appareils » comme « pas encore pris en charge ».
 
 ## Prérequis
@@ -79,6 +80,15 @@ pourcentage.
 La consigne d'humidité (30 à 90 %) est celle du mode en cours (auto ou sommeil). Le réservoir affiche _Bas_ quand
 il est vide ; les modèles avec une jauge affichent plutôt le niveau en pourcentage.
 
+### Déshumidificateurs
+
+La vitesse va de 1 (faible) à 3 (forte), la consigne d'humidité de 30 à 85 %. **Bac plein** passe à _oui_ quand
+l'appareil signale l'alerte du bac d'eau (bac plein ou retiré) : il s'est arrêté jusqu'à ce que le bac soit vidé.
+**Filtre à nettoyer** passe à _oui_ quand les heures de fonctionnement depuis le dernier nettoyage atteignent le
+rappel réglé dans l'application Dreo (600 h par défaut). Seuls les modes _Auto_ et _Continu_ sont connus pour
+l'instant : dans un autre mode (confort, séchage du linge…), le mode n'est pas mis à jour et l'intégration note dans ses
+journaux la valeur reçue — envoyez-la-nous pour qu'on l'ajoute.
+
 ## Widget
 
 Le widget **Appareils Dreo** montre tous les appareils Dreo ajoutés à Gladys sur une carte — allumés, éteints ou
@@ -91,13 +101,18 @@ Ajoutez-le depuis l'éditeur du tableau de bord.
 ou l'a retrouvée. Choisissez un appareil et/ou le changement, ou laissez vide. Variables : le nom de l'appareil et
 le nouvel état (`online` ou `offline`).
 
+**Bac plein d'un déshumidificateur Dreo** : le bac d'eau d'un déshumidificateur est plein (ou retiré) et l'appareil
+s'est arrêté. Choisissez un déshumidificateur ou laissez vide. Variable : le nom de l'appareil.
+
 ## Action de scène
 
 **Éteindre les appareils Dreo** : éteint tous les appareils Dreo ajoutés à Gladys qui sont allumés, ou seulement les
-types choisis (ventilateurs, chauffages, purificateurs, humidificateurs). Sortie : le nombre d'appareils éteints.
+types choisis (ventilateurs, chauffages, purificateurs, humidificateurs, déshumidificateurs). Sortie : le nombre d'appareils éteints.
 
 ## Exemples de scènes
 
+- **Bac plein** : quand _Bac plein d'un déshumidificateur Dreo_ se déclenche, envoyez-vous le message « Vider le
+  déshumidificateur ».
 - **Départ de la maison** : quand la dernière personne part, lancez _Éteindre les appareils Dreo_ avec le type
   _Chauffages_, puis envoyez-vous un message avec le nombre d'appareils éteints.
 - **Trop chaud dans la chambre** : quand la température de la chambre dépasse 26 °C après 22 h, allumez le
@@ -133,8 +148,8 @@ connexion, puis une requête par appareil toutes les 10 minutes), et n'envoie à
 - Développée sans le matériel : les modèles sont ceux de `hass-dreo`, les bornes d'un modèle absent de ses tables
   sont estimées.
 - Cloud uniquement : pas de commande locale, rien ne fonctionne sans Internet.
-- Les effets de l'éclairage d'ambiance (cycles de couleurs, scènes RGBIC), les minuteries, les réglages d'écran et de
-  son ne sont pas proposés. La couleur de l'ambiance n'est proposée que sur les modèles qui la renvoient.
-- Les climatiseurs, déshumidificateurs, ventilateurs brumisateurs et cuiseurs ne sont pas encore pris en charge.
+- Les effets de l'éclairage d'ambiance (cycles de couleurs, scènes RGBIC), les minuteries, les réglages d'écran (sauf sur les déshumidificateurs) et de son ne sont pas proposés. La couleur de l'ambiance n'est proposée que sur les modèles qui la renvoient.
+- Les climatiseurs, ventilateurs brumisateurs et cuiseurs ne sont pas encore pris en charge.
+- Déshumidificateurs : le sens des codes d'alerte du bac et des heures du filtre est une hypothèse (`hass-dreo` ne les décrit pas), et les modes confort et séchage du linge sont inconnus : vos retours sont les bienvenus.
 - Dreo donne les températures en °F : la conversion arrondit au dixième de degré, et la consigne au degré.
 - L'API du cloud Dreo n'est pas publique : Dreo peut la changer sans prévenir.

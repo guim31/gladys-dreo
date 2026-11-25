@@ -130,7 +130,10 @@ export function capabilities(profile, state) {
       caps.humidity = true;
     }
     if (has(state, 'rhautolevel')) {
-      caps.targetHumidity = { sleepKey: has(state, 'rhsleeplevel') ? 'rhsleeplevel' : null };
+      caps.targetHumidity = {
+        sleepKey: has(state, 'rhsleeplevel') ? 'rhsleeplevel' : null,
+        range: TARGET_HUMIDITY,
+      };
     }
     if (has(state, 'foglevel')) {
       caps.mistLevel = true;
@@ -139,6 +142,34 @@ export function capabilities(profile, state) {
       caps.waterLevel = true;
     } else if (has(state, 'wrong')) {
       caps.waterTank = true; // "wrong" is the tank status on humidifiers (pydreo)
+    }
+  }
+
+  if (kind === 'dehumidifier') {
+    if (profile.speed && has(state, 'windlevel')) {
+      caps.speed = { key: 'windlevel', range: profile.speed };
+    }
+    if (has(state, 'mode')) {
+      caps.mode = { key: 'mode', modes: profile.modes };
+    }
+    if (has(state, 'rh')) {
+      caps.humidity = true;
+    }
+    if (has(state, 'rhautolevel')) {
+      caps.targetHumidity = { sleepKey: null, range: profile.targetHumidity };
+    }
+    if (has(state, 'lighton')) {
+      caps.display = true;
+    }
+    if (has(state, 'wrong')) {
+      // On a dehumidifier, "wrong" is the alarm that stops it: full or
+      // missing water tank (pydreo pydreodehumidifier.py).
+      caps.tankFull = true;
+    }
+    if (has(state, 'worktime') && has(state, 'filterthr')) {
+      // Hours run since the filter was last cleaned, and the reminder
+      // threshold set in the app (600 h by default).
+      caps.filterClean = true;
     }
   }
 
@@ -339,8 +370,8 @@ export function buildDevice(gladys, dev, language) {
         category: C.SWITCH,
         type: T.SWITCH.DIMMER,
         read_only: false,
-        min: TARGET_HUMIDITY[0],
-        max: TARGET_HUMIDITY[1],
+        min: caps.targetHumidity.range[0],
+        max: caps.targetHumidity.range[1],
       }),
     );
   }
@@ -402,6 +433,37 @@ export function buildDevice(gladys, dev, language) {
         category: C.LEVEL_SENSOR,
         type: T.LEVEL_SENSOR.LIQUID_STATE,
         max: 2,
+      }),
+    );
+  }
+  if (caps.display) {
+    features.push(
+      feature(ids, 'display', n.display, {
+        category: C.SWITCH,
+        type: T.SWITCH.BINARY,
+        read_only: false,
+        keep_history: false,
+        max: 1,
+      }),
+    );
+  }
+  if (caps.tankFull) {
+    // input/binary: Gladys has no "tank full" sensor, and a leak sensor would
+    // announce a leak. 1 = full (the device has stopped).
+    features.push(
+      feature(ids, 'tank-full', n.tankFull, {
+        category: C.INPUT,
+        type: T.INPUT.BINARY,
+        max: 1,
+      }),
+    );
+  }
+  if (caps.filterClean) {
+    features.push(
+      feature(ids, 'filter-clean', n.filterClean, {
+        category: C.INPUT,
+        type: T.INPUT.BINARY,
+        max: 1,
       }),
     );
   }
@@ -508,6 +570,15 @@ function targetHumidityKey({ state, caps }) {
     : 'rhautolevel';
 }
 
+/**
+ * Whether a dehumidifier's tank is full: 0 is no alarm, 1 the known
+ * tank alarm; any other non-zero code is taken as an alarm too, the device
+ * having stopped. Null when not reported.
+ */
+export function tankFull(state) {
+  return Number.isInteger(state.wrong) ? (state.wrong === 0 ? 0 : 1) : null;
+}
+
 const number = (value) => (typeof value === 'number' && Number.isFinite(value) ? value : null);
 
 /**
@@ -587,6 +658,15 @@ export function featureValues(dev) {
   }
   if (caps.filterLife) {
     put('filter-life', number(state.lifetime));
+  }
+  if (caps.display && typeof state.lighton === 'boolean') {
+    put('display', state.lighton ? 1 : 0);
+  }
+  if (caps.tankFull) {
+    put('tank-full', tankFull(state));
+  }
+  if (caps.filterClean && number(state.worktime) !== null && number(state.filterthr) > 0) {
+    put('filter-clean', state.worktime >= state.filterthr ? 1 : 0);
   }
   if (caps.childLock && typeof state.childlockon === 'boolean') {
     put('child-lock', state.childlockon ? 1 : 0);
@@ -748,7 +828,10 @@ export function buildCommand(dev, key, value, config) {
     }
     case 'target-humidity':
       if (!caps.targetHumidity) break;
-      return { [targetHumidityKey(dev)]: integerIn(value, TARGET_HUMIDITY) };
+      return { [targetHumidityKey(dev)]: integerIn(value, caps.targetHumidity.range) };
+    case 'display':
+      if (!caps.display) break;
+      return { lighton: Number(value) === 1 };
     default:
       break;
   }

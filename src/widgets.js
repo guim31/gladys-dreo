@@ -6,7 +6,7 @@
 // -----------------------------------------------------------------------------
 
 import { WIDGET_COLORS } from '@gladysassistant/integration-sdk';
-import { currentMode, featureValues, isOn } from './devices.js';
+import { currentMode, featureValues, isOn, tankFull } from './devices.js';
 import { MODE_LABELS, WORDS } from './i18n.js';
 
 const MAX_ITEMS = 10; // a `status` component holds 10 rows at most
@@ -20,6 +20,10 @@ export function deviceSummary(dev, language) {
   if (!dev.connected) {
     return { value: words.offline, color: WIDGET_COLORS.DANGER, icon: 'wifi-off' };
   }
+  if (dev.caps.tankFull && tankFull(dev.state) === 1) {
+    // The alarm that stopped a dehumidifier comes before anything else.
+    return { value: words.tankFull, color: WIDGET_COLORS.WARNING, icon: 'alert-triangle' };
+  }
   const on = isOn(dev);
   const values = featureValues(dev);
   const parts = [on ? words.on : words.off];
@@ -30,7 +34,8 @@ export function deviceSummary(dev, language) {
   if (on && values.speed) {
     parts.push(`${words.speed} ${values.speed.state}`);
   }
-  if (values.temperature) {
+  // A dehumidifier is about humidity; the others show their temperature.
+  if (values.temperature && dev.caps.kind !== 'dehumidifier') {
     parts.push(`${values.temperature.state} °C`);
   } else if (values.humidity) {
     parts.push(`${values.humidity.state} %`);

@@ -3,7 +3,7 @@
 // Keys are forever once published.
 // -----------------------------------------------------------------------------
 
-export const GROUPS = ['fans', 'heaters', 'purifiers', 'humidifiers'];
+export const GROUPS = ['fans', 'heaters', 'purifiers', 'humidifiers', 'dehumidifiers'];
 
 export const SCENE_ACTIONS = {
   /**

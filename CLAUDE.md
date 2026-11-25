@@ -296,5 +296,12 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
   qu'il est éteint. L'extinction et la consigne restent toujours possibles.
 - `lifetime` n'est un pourcentage de filtre que sur certains purificateurs (DR-HAP007S) : ailleurs ce sont des
   heures. `wrong` est le réservoir des humidificateurs (0 plein, 1 ou 4 vide), un code d'erreur ailleurs.
+- **Déshumidificateurs DR-HDH** (pydreo `pydreodehumidifier.py`, développés sans l'appareil, demande de pjrlyon t/11647) :
+  `windlevel` 1–3, `rhautolevel` 30–85, `mode` 1 auto / 2 continu (seules valeurs connues : confort et séchage du
+  linge inconnus, un mode inconnu est noté une fois au niveau info par `noteUnknownMode`), `lighton` = écran, `wrong`
+  = alarme du bac (0 rien, 1 connu, tout autre code non nul pris comme alarme ; hass-dreo l'appelle « empty » par
+  copie des humidificateurs), `worktime` ≥ `filterthr` (600 h) = filtre à nettoyer (hypothèse), `temperature` en °F.
+  Bac plein et filtre en `input/binary` (pas de capteur « bac plein » dans Gladys, `leak-sensor` annoncerait une
+  fuite) ; déclencheur `water_tank_full` sur le passage 0 → 1 seulement.
 - Beaucoup de modèles récents ont un `controlsConf` vide : bornes de vitesse et modes viennent alors de la table de
   `src/dreo/models.js` (reprise de pydreo `models.py`), sinon des valeurs par défaut du type.

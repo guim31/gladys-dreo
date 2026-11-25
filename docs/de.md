@@ -1,6 +1,6 @@
 # Dreo
 
-Steuere deine **Dreo**-Ventilatoren, Heizgeräte, Luftreiniger und Luftbefeuchter über Gladys, über die
+Steuere deine **Dreo**-Ventilatoren, Heizgeräte, Luftreiniger, Luftbefeuchter und Luftentfeuchter über Gladys, über die
 Dreo-Cloud — denselben Dienst, den die Dreo-App nutzt. Zustände kommen in Echtzeit an: Eine Stufe, die du an
 der Fernbedienung oder in der App änderst, erscheint innerhalb einer Sekunde in Gladys.
 
@@ -10,16 +10,17 @@ der Fernbedienung oder in der App änderst, erscheint innerhalb einer Sekunde in
 
 ## Überblick
 
-| Dreo-Gerät                                              | Was du in Gladys bekommst                                                                                                                |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Turmventilatoren (DR-HTF…)                              | Ein/Aus, Stufe, Modus, Oszillation, Raumtemperatur                                                                                       |
-| Luftzirkulatoren / Standventilatoren (DR-HAF…, DR-HPF…) | Ein/Aus, Stufe, Modus, Oszillation (horizontal und vertikal), Raumtemperatur                                                             |
-| Deckenventilatoren (DR-HCF…)                            | Ventilator Ein/Aus, Stufe, Modus (auch umgekehrt); Licht: Ein/Aus, Helligkeit, Farbtemperatur; Ambientelicht: Ein/Aus, Helligkeit, Farbe |
-| Heizgeräte (DR-HSH…, WH…)                               | Ein/Aus (siehe Sicherheit), Solltemperatur, Modus, Heizstufe, Raumtemperatur, Kindersicherung (nur lesen)                                |
-| Luftreiniger (DR-HAP…)                                  | Ein/Aus, Stufe, Modus, PM2.5, Filterlebensdauer (wenn in % gemeldet)                                                                     |
-| Luftbefeuchter (DR-HHM…)                                | Ein/Aus, Modus, Zielfeuchtigkeit, Nebelstufe, Luftfeuchtigkeit, Wassertank oder Wasserstand                                              |
+| Dreo-Gerät                                              | Was du in Gladys bekommst                                                                                                                                                       |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Turmventilatoren (DR-HTF…)                              | Ein/Aus, Stufe, Modus, Oszillation, Raumtemperatur                                                                                                                              |
+| Luftzirkulatoren / Standventilatoren (DR-HAF…, DR-HPF…) | Ein/Aus, Stufe, Modus, Oszillation (horizontal und vertikal), Raumtemperatur                                                                                                    |
+| Deckenventilatoren (DR-HCF…)                            | Ventilator Ein/Aus, Stufe, Modus (auch umgekehrt); Licht: Ein/Aus, Helligkeit, Farbtemperatur; Ambientelicht: Ein/Aus, Helligkeit, Farbe                                        |
+| Heizgeräte (DR-HSH…, WH…)                               | Ein/Aus (siehe Sicherheit), Solltemperatur, Modus, Heizstufe, Raumtemperatur, Kindersicherung (nur lesen)                                                                       |
+| Luftreiniger (DR-HAP…)                                  | Ein/Aus, Stufe, Modus, PM2.5, Filterlebensdauer (wenn in % gemeldet)                                                                                                            |
+| Luftbefeuchter (DR-HHM…)                                | Ein/Aus, Modus, Zielfeuchtigkeit, Nebelstufe, Luftfeuchtigkeit, Wassertank oder Wasserstand                                                                                     |
+| Luftentfeuchter (DR-HDH…)                               | Ein/Aus, Lüfterstufe (niedrig, mittel, hoch), Modus, Zielfeuchtigkeit, Luftfeuchtigkeit, Raumtemperatur, Display, Wassertank voll, Filter reinigen, Kindersicherung (nur lesen) |
 
-Andere Dreo-Produkte (Klimageräte, Luftentfeuchter, Sprühnebelventilatoren, Kochgeräte) listet die Schaltfläche
+Andere Dreo-Produkte (Klimageräte, Sprühnebelventilatoren, Kochgeräte) listet die Schaltfläche
 „Geräte aktualisieren" als „noch nicht unterstützt" auf.
 
 ## Voraussetzungen
@@ -78,6 +79,15 @@ melden.
 Die Zielfeuchtigkeit (30 bis 90 %) ist die des aktuellen Modus (Auto oder Schlaf). Der Wassertank zeigt _Niedrig_,
 wenn er leer ist; Modelle mit Füllstandsanzeige zeigen stattdessen den Stand in Prozent.
 
+### Luftentfeuchter
+
+Die Lüfterstufe geht von 1 (niedrig) bis 3 (hoch), die Zielfeuchtigkeit von 30 bis 85 %. **Wassertank voll** geht auf
+_an_, wenn das Gerät den Alarm des Wassertanks meldet (voll oder entnommen): Es steht, bis der Tank geleert ist.
+**Filter reinigen** geht auf _an_, wenn die Betriebsstunden seit der letzten Reinigung die Erinnerung aus der
+Dreo-App erreichen (standardmäßig 600 h). Bisher sind nur die Modi _Auto_ und _Dauerbetrieb_ bekannt: In einem
+anderen Modus (Komfort, Wäschetrocknung…) wird der Modus nicht aktualisiert, und die Integration schreibt den empfangenen Wert ins
+Log — schick ihn uns, damit wir ihn ergänzen.
+
 ## Widget
 
 Das Widget **Dreo-Geräte** zeigt alle zu Gladys hinzugefügten Dreo-Geräte auf einer Karte — an, aus oder offline,
@@ -90,14 +100,19 @@ des Dashboards hinzu.
 oder wiederhergestellt. Wähle ein Gerät und/oder die Änderung, oder lass sie leer. Variablen: der Gerätename und der
 neue Zustand (`online` oder `offline`).
 
+**Wassertank eines Dreo-Luftentfeuchters voll**: Der Wassertank eines Luftentfeuchters ist voll (oder entnommen),
+und das Gerät steht. Wähle einen Luftentfeuchter oder lass das Feld leer. Variable: der Gerätename.
+
 ## Szenen-Aktion
 
 **Dreo-Geräte ausschalten**: schaltet alle zu Gladys hinzugefügten Dreo-Geräte aus, die an sind, oder nur die
-gewählten Arten (Ventilatoren, Heizgeräte, Luftreiniger, Luftbefeuchter). Ausgabe: die Zahl der ausgeschalteten
+gewählten Arten (Ventilatoren, Heizgeräte, Luftreiniger, Luftbefeuchter, Luftentfeuchter). Ausgabe: die Zahl der ausgeschalteten
 Geräte.
 
 ## Szenen-Beispiele
 
+- **Tank voll**: Wenn _Wassertank eines Dreo-Luftentfeuchters voll_ auslöst, schick dir die Nachricht „Entfeuchter
+  leeren“.
 - **Haus verlassen**: Wenn die letzte Person geht, starte _Dreo-Geräte ausschalten_ mit der Art _Heizgeräte_ und
   schicke dir dann eine Nachricht mit der Zahl der ausgeschalteten Geräte.
 - **Zu warm im Schlafzimmer**: Wenn die Schlafzimmertemperatur nach 22 Uhr über 26 °C steigt, schalte den
@@ -133,8 +148,8 @@ Anmeldung, dann eine Anfrage pro Gerät alle 10 Minuten), und schickt Gladys nur
 - Ohne die Hardware entwickelt: Die Modelle sind die von `hass-dreo`, die Grenzen eines Modells, das in seinen
   Tabellen fehlt, sind geschätzt.
 - Nur Cloud: keine lokale Steuerung, nichts funktioniert ohne Internet.
-- Effekte des Ambientelichts (Farbwechsel, RGBIC-Szenen), Timer, Anzeige- und Toneinstellungen werden nicht
-  angeboten. Die Farbe des Ambientelichts gibt es nur bei Modellen, die sie melden.
-- Klimageräte, Luftentfeuchter, Sprühnebelventilatoren und Kochgeräte werden noch nicht unterstützt.
+- Effekte des Ambientelichts (Farbwechsel, RGBIC-Szenen), Timer, Anzeige- (außer bei Luftentfeuchtern) und Toneinstellungen werden nicht angeboten. Die Farbe des Ambientelichts gibt es nur bei Modellen, die sie melden.
+- Klimageräte, Sprühnebelventilatoren und Kochgeräte werden noch nicht unterstützt.
+- Luftentfeuchter: Die Bedeutung der Tank-Alarmcodes und der Filterstunden ist eine Annahme (`hass-dreo` beschreibt sie nicht), und die Modi Komfort und Wäschetrocknung sind unbekannt: Rückmeldungen sind willkommen.
 - Dreo meldet Temperaturen in °F: Die Umrechnung rundet auf 0,1 °C, die Solltemperatur auf ganze Grad.
 - Die API der Dreo-Cloud ist nicht öffentlich: Dreo kann sie ohne Vorwarnung ändern.
