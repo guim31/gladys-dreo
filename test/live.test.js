@@ -318,11 +318,11 @@ test('dehumidifier: commands, and an unknown mode logged once', async (t) => {
   assert.deepEqual(ack, { success: true });
   assert.deepEqual(cloud.commands.slice(before)[0].params, { rhautolevel: 45 });
   logs.clear();
-  cloud.report('HDH002S', { mode: 3 });
+  cloud.report('HDH002S', { mode: 9 });
   await settle();
-  cloud.report('HDH002S', { mode: 3 });
+  cloud.report('HDH002S', { mode: 9 });
   await settle();
-  const unknown = logs.at('info').filter((line) => line.includes('unknown mode 3'));
+  const unknown = logs.at('info').filter((line) => line.includes('unknown mode 9'));
   assert.equal(unknown.length, 1);
 });
 

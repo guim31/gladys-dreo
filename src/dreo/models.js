@@ -82,12 +82,13 @@ const HUMIDIFIER_MODES = [
   ['auto', 1],
   ['sleep', 2],
 ];
-// Dehumidifiers (pydreo pydreodehumidifier.py): only these two values are
-// known. Other modes of the app (comfort, laundry drying) have values nobody
-// has reported yet: a device in one of them shows no mode (src/hub.js logs it).
+// Dehumidifiers (pydreo pydreodehumidifier.py): auto and continuous; custom
+// ("Perso" in the app) is 3, reported by an owner of a DR-HDH002S. Any other
+// value shows no mode (src/hub.js logs it).
 const DEHUMIDIFIER_MODES = [
   ['auto', 1],
   ['continuous', 2],
+  ['custom', 3],
 ];
 const HEATER_MODES = [
   ['hotair', 'hotair'],

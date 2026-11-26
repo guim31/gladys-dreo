@@ -332,6 +332,7 @@ test('dehumidifier (DR-HDH002S): power, fan 1-3, modes, humidity, target, displa
   assert.deepEqual(buildCommand(dehumidifier, 'speed', 3, DEFAULT), { windlevel: 3 });
   assert.throws(() => buildCommand(dehumidifier, 'speed', 4, DEFAULT), /not valid/);
   assert.deepEqual(buildCommand(dehumidifier, 'mode', 'continuous', DEFAULT), { mode: 2 });
+  assert.deepEqual(buildCommand(dehumidifier, 'mode', 'custom', DEFAULT), { mode: 3 });
   assert.deepEqual(buildCommand(dehumidifier, 'target-humidity', 45, DEFAULT), {
     rhautolevel: 45,
   });
@@ -350,8 +351,9 @@ test('dehumidifier alarms: any tank code is full, the filter past its threshold'
   assert.equal(filter(599, 600), 0);
   assert.equal(filter(600, 600), 1);
   assert.equal(filter(10, 0), undefined, 'no threshold, no value');
+  assert.deepEqual(featureValues(dev('HDH002S', { mode: 3 })).mode, { text: 'custom' });
   // A mode value nobody has reported yet shows no mode rather than a wrong one.
-  assert.equal(featureValues(dev('HDH002S', { mode: 3 })).mode, undefined);
+  assert.equal(featureValues(dev('HDH002S', { mode: 9 })).mode, undefined);
 });
 
 test('a dehumidifier without the alarm keys has no alarm feature', () => {
