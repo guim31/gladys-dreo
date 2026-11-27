@@ -10,6 +10,10 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+### Fixed
+
+- Dehumidifiers: the Custom mode ("Perso" in the Dreo app, value 3) is now shown and can be selected.
+
 ## [1.2.0] - 2026-11-25
 
 ### Added
