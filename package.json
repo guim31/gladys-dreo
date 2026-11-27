@@ -1,6 +1,6 @@
 {
   "name": "gladys-dreo",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Gladys Assistant integration for Dreo fans, heaters, air purifiers and humidifiers (Dreo cloud).",
   "type": "module",

@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-27
+
 ### Fixed
 
 - Dehumidifiers: the Custom mode ("Perso" in the Dreo app, value 3) is now shown and can be selected.
@@ -58,7 +60,8 @@ the notes of the version's GitHub Release.
   or not.
 - Texts and documentation in English, French, German and Spanish.
 
-[Unreleased]: https://github.com/guim31/gladys-dreo/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/guim31/gladys-dreo/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/guim31/gladys-dreo/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/guim31/gladys-dreo/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/guim31/gladys-dreo/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/guim31/gladys-dreo/releases/tag/v1.0.1
